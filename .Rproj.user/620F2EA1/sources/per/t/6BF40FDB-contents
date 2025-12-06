@@ -1,0 +1,191 @@
+---
+title: "Data Manipulation"
+author: "WAK"
+format: html
+editor: visual
+---
+
+```{r}
+#| include: false
+#| warning: false
+#| echo: false
+
+library(epiDisplay)
+library(knitr)
+library(pROC)
+library(tidyverse)
+library(readxl)
+library(ggplot2)
+library(gmodels)
+library(ggbeeswarm)
+library(dplyr)
+library(readr)
+library(ggpubr)
+library(psych)
+library(lme4)
+library(Matrix)
+library(lmerTest)
+library(irr)
+library(lmerTest)
+library(emmeans)
+library(doBy)       
+library(gmodels)    
+library(car)           
+library(cowplot)       
+library(gridGraphics)  
+library(multcomp)
+library(hms)
+library(gt)
+library(lubridate)
+library(nlme)
+library(extrafont)
+```
+
+## Data Steps
+
+### Bringing in the data
+
+```{r}
+
+#pull in data 
+
+kdd1 <- read_csv('data/kdd1.csv')
+kdd2 <- read_csv('data/kdd2.csv')
+kdd3 <- read_csv('data/kdd3.csv')
+kdd4 <- read_csv('data/kdd4.csv')
+
+#trim all data so it can be merged
+
+kdd1trim <- 
+  kdd1 %>% 
+  select( "ID", "EID", "CBRD", "BDAT", "Event", "DIM", "Date", "Remark")
+
+kdd2trim <- 
+  kdd2 %>% 
+  select( "ID", "EID", "CBRD", "BDAT", "Event", "DIM", "Date", "Remark")
+
+kdd3trim <- 
+  kdd3 %>% 
+  select( "ID", "EID", "CBRD", "BDAT", "Event", "DIM", "Date", "Remark")
+
+kdd4trim <- 
+  kdd4 %>% 
+  select( "ID", "EID", "CBRD", "BDAT", "Event", "DIM", "Date", "Remark")
+
+#merge into one data set
+STACK <- 
+  bind_rows(
+   kdd1trim = kdd1trim,
+   kdd2trim = kdd2trim, 
+   kdd3trim = kdd3trim, 
+   kdd4trim = kdd4trim,
+    .id = "source"
+  )
+
+
+#pull out events we want
+
+stack_new <- 
+  STACK %>% 
+  filter(Event %in% c("PNEU", "GODEER", "Remark", "SCOURS", "DIED", "DIM", "MEASURE"))
+
+stack_new1 <- stack_new %>%
+  arrange(ID, Event, Date) %>%   # ensure chronological order
+  group_by(ID, Event) %>%
+  slice_head(n = 3) %>%
+  ungroup()
+
+stack_new2 <- 
+  stack_new1 %>% 
+  group_by(ID, Event) %>% 
+  mutate(Event_num = row_number()) %>% 
+  ungroup() %>% 
+  unite(Event_tag, Event, Event_num, sep="")
+
+stack_new3<-
+  stack_new2 %>% 
+  pivot_wider(
+    id_cols = c(ID, CBRD),
+    names_from = Event_tag, 
+    values_from = c(Date, Remark, DIM)
+  )
+
+#get rid of calves that don't have a godeer event
+
+stack_new3 <- stack_new3 %>%
+  filter(!is.na(Date_GODEER1))
+
+
+final<- 
+  stack_new3 %>% 
+  select(
+    ID, CBRD, Date_PNEU1, Remark_PNEU1, DIM_PNEU1, Date_PNEU2, Remark_PNEU2, DIM_PNEU2, Date_PNEU3, Remark_PNEU3, DIM_PNEU3, Date_SCOURS1, Remark_SCOURS1, DIM_SCOURS1, Date_SCOURS2, Remark_SCOURS2, DIM_SCOURS2, Date_MEASURE1, Remark_MEASURE1, DIM_MEASURE1, Date_MEASURE2, Remark_MEASURE2, DIM_MEASURE2, Date_DIED1, Remark_DIED1, DIM_DIED1, Date_GODEER1, Remark_GODEER1, DIM_GODEER1
+  )
+
+```
+
+### Merge with Enroll Data
+
+```{r}
+
+enroll <- read_csv('data/KDD enroll.csv')
+
+full <- final %>% 
+  left_join(enroll, by = "ID")
+
+full <- full %>%
+  relocate(EID, BDAT, SEX, CBRD.y, TPROT, .before = ID) %>% 
+  select(-CBRD.x, -GODER, -AIDGO, -BTHWT) %>%
+  filter(!is.na(EID))
+
+
+write.csv(x = full, file = "data/FINAL.csv")
+```
+
+### Add Stuff, manipulate dates
+
+```{r}
+
+
+full_dates <- full %>%
+  mutate(
+    BDAT = mdy(BDAT),
+    Date_PNEU1 = mdy(Date_PNEU1), 
+    Date_PNEU2 = mdy(Date_PNEU2), 
+    Date_PNEU3 = mdy(Date_PNEU3), 
+    Date_SCOURS1 = mdy(Date_SCOURS1), 
+    Date_SCOURS2 = mdy(Date_SCOURS2), 
+    Date_MEASURE1 = mdy(Date_MEASURE1), 
+    Date_MEASURE2 = mdy(Date_MEASURE2), 
+    Date_DIED1 = mdy(Date_DIED1), 
+    Date_GODEER1 = mdy(Date_GODEER1))
+
+
+full_dates<-full_dates %>% 
+  mutate(
+    wt1 = as.numeric(Remark_MEASURE1), 
+    wt2 = as.numeric (Remark_MEASURE2))
+
+
+full_dates <- full_dates %>%
+  mutate(
+    LOAD = factor(paste(Date_GODEER1, Remark_GODEER1, sep = "_")))
+
+full_dates <- full_dates %>%
+  mutate(
+    LOADfull = factor(paste(Date_GODEER1)))
+
+datachecks <- full_dates %>% 
+  count(LOAD) 
+
+datachecks1 <- full_dates %>% 
+  count(LOADfull)
+
+datachecks
+datachecks1
+
+write.csv(x = datachecks, file = "data/trailer loads comp.csv")
+write.csv(x=datachecks1, file = "data/trailer load.csv")
+
+#when did the data actually start to be collected well? Looks to me like sometime in march? 
+```
