@@ -1,9 +1,0 @@
-"0","datachecks <- full_dates %>% 
-  count(LOAD) 
-
-datachecks1 <- full_dates %>% 
-  count(LOADfull)
-
-datachecks
-"
-"0","datachecks1"

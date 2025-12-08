@@ -82,6 +82,11 @@ STACK <-
     .id = "source"
   )
 
+STACK %>% 
+  group_by(Event, Remark) %>% 
+  count()
+  
+
 
 #pull out events we want
 
@@ -107,8 +112,7 @@ stack_new3<-
   pivot_wider(
     id_cols = c(ID, CBRD),
     names_from = Event_tag, 
-    values_from = c(Date, Remark, DIM)
-  )
+    values_from = c(Date, Remark, DIM) )
 
 #get rid of calves that don't have a godeer event
 
@@ -122,24 +126,37 @@ final<-
     ID, CBRD, Date_PNEU1, Remark_PNEU1, DIM_PNEU1, Date_PNEU2, Remark_PNEU2, DIM_PNEU2, Date_PNEU3, Remark_PNEU3, DIM_PNEU3, Date_SCOURS1, Remark_SCOURS1, DIM_SCOURS1, Date_SCOURS2, Remark_SCOURS2, DIM_SCOURS2, Date_MEASURE1, Remark_MEASURE1, DIM_MEASURE1, Date_MEASURE2, Remark_MEASURE2, DIM_MEASURE2, Date_DIED1, Remark_DIED1, DIM_DIED1, Date_GODEER1, Remark_GODEER1, DIM_GODEER1
   )
 
+final %>% 
+  group_by(Remark_GODEER1) %>% 
+  count()
+
 ```
 
 ### Merge with Enroll Data
+
+Something is going on with missing data. I need to ditch the enroll and figure out how to add sex and Total protein into the first download? Forgot to use the \b! which removed calves who died and/or who were sold
 
 ```{r}
 
 enroll <- read_csv('data/KDD enroll.csv')
 
+final$ID <- as.character(final$ID)
+enroll$ID <- as.character(enroll$ID)
+
 full <- final %>% 
   left_join(enroll, by = "ID")
 
 full <- full %>%
-  relocate(EID, BDAT, SEX, CBRD.y, TPROT, .before = ID) %>% 
-  select(-CBRD.x, -GODER, -AIDGO, -BTHWT) %>%
-  filter(!is.na(EID))
+  relocate(EID, BDAT, SEX, CBRD.y, TPROT, BTHWT, .before = ID) %>% 
+  select(-CBRD.x, -GODER, -BTHWT) 
 
 
 write.csv(x = full, file = "data/FINAL.csv")
+
+
+full %>% 
+  group_by(Remark_GODEER1) %>% 
+  count()
 ```
 
 ### Add Stuff, manipulate dates
@@ -187,5 +204,54 @@ datachecks1
 write.csv(x = datachecks, file = "data/trailer loads comp.csv")
 write.csv(x=datachecks1, file = "data/trailer load.csv")
 
-#when did the data actually start to be collected well? Looks to me like sometime in march? 
+
+```
+
+### Compartments Summary
+
+```{r}
+
+comp <- read_csv('data/COMPARTMENTS.csv') %>% 
+  drop_na()
+
+head(comp$SD)
+
+comp %>% 
+  summarize(
+    total = sum(n))
+
+comp %>% 
+  group_by(comp) %>% 
+  summarize(
+    total = sum(n),
+    calves = mean(n), 
+    calvessd = sd(n))
+
+comp %>% 
+  group_by(comp) %>% 
+  summarize(
+    total = sum(n),
+    Stockingrate =mean(SD),
+    sd = sd(SD))
+
+comp %>% 
+  group_by(date) %>% 
+  summarize(
+    total = sum(n), 
+    sd = mean(SD))
+
+
+comp %>% 
+  ggplot(aes(x=as.factor(comp), y=n, color = as.factor(comp)))+
+  geom_boxplot()+
+  geom_jitter() + 
+  theme_classic()
+
+comp %>% 
+  ggplot(aes(x=as.factor(comp), y=SD, color = as.factor(comp)))+
+  geom_boxplot()+
+  geom_jitter() + 
+  theme_classic()
+
+
 ```
