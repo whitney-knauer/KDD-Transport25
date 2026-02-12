@@ -85,18 +85,18 @@ STACK <-
 STACK %>% 
   group_by(Event, Remark) %>% 
   count()
-  
 
 
 #pull out events we want
 
 stack_new <- 
   STACK %>% 
-  filter(Event %in% c("PNEU", "GODEER", "Remark", "SCOURS", "DIED", "DIM", "MEASURE"))
+  filter(Event %in% c("PNEU", "GODEER", "Remark", "SCOURS", "DIED", "DIM", "MEASURE", "ARVDPOT", "ARVKDD", "BLOAT", "HLTHSCR", "ILLMISC", "INJURY", "LAME", "NAVEL", "OTITIS", "SEPTIC"))
 
 stack_new1 <- stack_new %>%
+  mutate(Date = lubridate::mdy(Date)) %>% 
   arrange(ID, Event, Date) %>%   # ensure chronological order
-  group_by(ID, Event) %>%
+  group_by(ID, Event, Date) %>%
   slice_head(n = 3) %>%
   ungroup()
 
@@ -123,8 +123,7 @@ stack_new3 <- stack_new3 %>%
 final<- 
   stack_new3 %>% 
   select(
-    ID, CBRD, Date_PNEU1, Remark_PNEU1, DIM_PNEU1, Date_PNEU2, Remark_PNEU2, DIM_PNEU2, Date_PNEU3, Remark_PNEU3, DIM_PNEU3, Date_SCOURS1, Remark_SCOURS1, DIM_SCOURS1, Date_SCOURS2, Remark_SCOURS2, DIM_SCOURS2, Date_MEASURE1, Remark_MEASURE1, DIM_MEASURE1, Date_MEASURE2, Remark_MEASURE2, DIM_MEASURE2, Date_DIED1, Remark_DIED1, DIM_DIED1, Date_GODEER1, Remark_GODEER1, DIM_GODEER1
-  )
+    ID, CBRD, Date_PNEU1, Remark_PNEU1, Date_PNEU2, Remark_PNEU2, Date_PNEU3, Remark_PNEU3, Date_SCOURS1, Remark_SCOURS1, Date_SCOURS2, Remark_SCOURS2, Date_MEASURE1, Remark_MEASURE1, Date_MEASURE2, Remark_MEASURE2, Date_DIED1, Remark_DIED1, Date_GODEER1, Remark_GODEER1, Date_ARVKDD1, Remark_ARVKDD1, Date_ARVDPOT1, Date_BLOAT1, Remark_BLOAT1, Date_BLOAT2, Remark_BLOAT2, Date_HLTHSCR1, Remark_HLTHSCR1, Date_ILLMISC1, Remark_ILLMISC1, Date_INJURY1, Remark_INJURY1, Date_INJURY2, Remark_INJURY2, Date_LAME1, Remark_LAME1, Date_NAVEL1, Remark_NAVEL1, Date_OTITIS1, Remark_OTITIS1, Date_SEPTIC1, Remark_SEPTIC1)
 
 final %>% 
   group_by(Remark_GODEER1) %>% 
@@ -164,21 +163,7 @@ full %>%
 ```{r}
 
 
-full_dates <- full %>%
-  mutate(
-    BDAT = mdy(BDAT),
-    Date_PNEU1 = mdy(Date_PNEU1), 
-    Date_PNEU2 = mdy(Date_PNEU2), 
-    Date_PNEU3 = mdy(Date_PNEU3), 
-    Date_SCOURS1 = mdy(Date_SCOURS1), 
-    Date_SCOURS2 = mdy(Date_SCOURS2), 
-    Date_MEASURE1 = mdy(Date_MEASURE1), 
-    Date_MEASURE2 = mdy(Date_MEASURE2), 
-    Date_DIED1 = mdy(Date_DIED1), 
-    Date_GODEER1 = mdy(Date_GODEER1))
-
-
-full_dates<-full_dates %>% 
+full_dates<-full %>% 
   mutate(
     wt1 = as.numeric(Remark_MEASURE1), 
     wt2 = as.numeric (Remark_MEASURE2))
@@ -203,6 +188,7 @@ datachecks1
 
 write.csv(x = datachecks, file = "data/trailer loads comp.csv")
 write.csv(x=datachecks1, file = "data/trailer load.csv")
+write.csv(x=full_dates, file = "data/checks.csv")
 
 
 ```
@@ -254,4 +240,41 @@ comp %>%
   theme_classic()
 
 
+```
+
+### Dates and Treatments
+
+```{r}
+
+full_new <- full_dates %>%
+  mutate(across(c(BDAT, starts_with("Date_")), 
+         ~ as.Date(parse_date_time(trimws(as.character(.x)), orders = c("mdy", "dmy", "ymd"))))) %>%
+  mutate(
+    diaload = as.numeric(Date_GODEER1 - BDAT), 
+    diaARR  = as.numeric(Date_ARVKDD1 - BDAT), 
+    dfaP1   = as.numeric(Date_PNEU1 - Date_ARVKDD1),
+    dbtwP12 = as.numeric(Date_PNEU2 - Date_PNEU1),
+    dbtwP23 = as.numeric(Date_PNEU3 - Date_PNEU2),
+    dfaP2   = as.numeric(Date_PNEU2 - Date_ARVKDD1), 
+    dfaP3   = as.numeric(Date_PNEU3 - Date_ARVKDD1), 
+    dfaD1   = as.numeric(Date_SCOURS1 - Date_ARVKDD1),
+    dfaD2   = as.numeric(Date_SCOURS2 - Date_ARVKDD1), 
+    dbtwD12 = as.numeric(Date_SCOURS2 - Date_SCOURS1),
+    dfaB1   = as.numeric(Date_BLOAT1 - Date_ARVKDD1), 
+    dfaB2   = as.numeric(Date_BLOAT2 - Date_ARVKDD1), 
+    dfaN1   = as.numeric(Date_NAVEL1 - Date_ARVKDD1), 
+    dfaIM1  = as.numeric(Date_ILLMISC1 - Date_ARVKDD1),
+    dfaI1   = as.numeric(Date_INJURY1 - Date_ARVKDD1),
+    dfaL1   = as.numeric(Date_LAME1 - Date_ARVKDD1), 
+    dfaO1   = as.numeric(Date_OTITIS1 - Date_ARVKDD1), 
+    dfaS1   = as.numeric(Date_SEPTIC1 - Date_ARVKDD1),
+    dfaDIED = as.numeric(Date_DIED1 - Date_ARVKDD1)
+  )
+
+
+
+write.csv(x=full_new, file = "data/datachecks.csv")
+
+
+#now need to define dia1, pneu1, etc and tag animals who were treated prior to transport. 
 ```

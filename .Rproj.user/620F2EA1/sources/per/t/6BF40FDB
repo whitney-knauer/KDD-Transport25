@@ -3,7 +3,7 @@
     "path": "~/GitHub/KDD-Transport25/Data Manipulation.qmd",
     "project_path": "Data Manipulation.qmd",
     "type": "quarto_markdown",
-    "hash": "737163314",
+    "hash": "1504319573",
     "contents": "",
     "dirty": false,
     "created": 1764983300114.0,
@@ -15,19 +15,19 @@
         "tempName": "Untitled1",
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "256,0",
+        "cursorPosition": "246,0",
         "scrollLine": "0",
         "docOutlineVisible": "1",
         "rmdVisualCollapsedChunks": "",
-        "rmdVisualModeLocation": "3318:4221.60009765625",
-        "docOutlineSize": "274"
+        "rmdVisualModeLocation": "6422:0",
+        "docOutlineSize": "127"
     },
     "folds": "",
-    "lastKnownWriteTime": 1765213914,
+    "lastKnownWriteTime": 1770855260,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1765213914876,
+    "last_content_update": 1770855260438,
     "read_only": false,
     "read_only_alternatives": []
 }

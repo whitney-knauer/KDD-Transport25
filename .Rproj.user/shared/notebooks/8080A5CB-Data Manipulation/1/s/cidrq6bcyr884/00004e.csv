@@ -1,7 +1,0 @@
-"0",""
-"0","comp %>% "
-"0","  group_by(comp) %>% "
-"0","  summarize("
-"0","    total = sum(n),"
-"0","    calves = mean(n), "
-"0","    calvessd = sd(n))"
