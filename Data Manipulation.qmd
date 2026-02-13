@@ -53,6 +53,7 @@ kdd1 <- read_csv('data/kdd1.csv')
 kdd2 <- read_csv('data/kdd2.csv')
 kdd3 <- read_csv('data/kdd3.csv')
 kdd4 <- read_csv('data/kdd4.csv')
+kdd5 <- read_csv('data/kdd5.csv')
 
 #trim all data so it can be merged
 
@@ -72,6 +73,10 @@ kdd4trim <-
   kdd4 %>% 
   select( "ID", "EID", "CBRD", "BDAT", "Event", "DIM", "Date", "Remark")
 
+kdd5trim <- 
+  kdd5 %>% 
+  select( "ID", "EID", "CBRD", "BDAT", "Event", "DIM", "Date", "Remark")
+
 #merge into one data set
 STACK <- 
   bind_rows(
@@ -79,6 +84,7 @@ STACK <-
    kdd2trim = kdd2trim, 
    kdd3trim = kdd3trim, 
    kdd4trim = kdd4trim,
+   kdd5trim = kdd5trim,
     .id = "source"
   )
 
@@ -146,8 +152,13 @@ full <- final %>%
   left_join(enroll, by = "ID")
 
 full <- full %>%
+  filter(Date_GODEER1 < "2025-11-13") %>% 
   relocate(EID, BDAT, SEX, CBRD.y, TPROT, BTHWT, .before = ID) %>% 
   select(-CBRD.x, -GODER, -BTHWT) 
+
+full <- full %>%
+  filter(!is.na(as.numeric(TPROT))) %>% 
+  mutate(TPROT = as.numeric(TPROT))
 
 
 write.csv(x = full, file = "data/FINAL.csv")
@@ -196,6 +207,8 @@ write.csv(x=full_dates, file = "data/checks.csv")
 ### Compartments Summary
 
 ```{r}
+
+#any comp with NA or <10 calves were removed as this seemed unlikely (n = 7 compartments totaling n=41 calves was removed )
 
 comp <- read_csv('data/COMPARTMENTS.csv') %>% 
   drop_na()
@@ -246,7 +259,15 @@ comp %>%
 
 ```{r}
 
-full_new <- full_dates %>%
+
+#need to merge compartments and full data set together so each calf has that data. 
+
+full_comp <- full_dates %>% 
+  inner_join(comp, by = "LOAD")
+
+#inner join goes from 41965 to 41661
+
+full_new <- full_comp %>%
   mutate(across(c(BDAT, starts_with("Date_")), 
          ~ as.Date(parse_date_time(trimws(as.character(.x)), orders = c("mdy", "dmy", "ymd"))))) %>%
   mutate(
@@ -268,13 +289,183 @@ full_new <- full_dates %>%
     dfaL1   = as.numeric(Date_LAME1 - Date_ARVKDD1), 
     dfaO1   = as.numeric(Date_OTITIS1 - Date_ARVKDD1), 
     dfaS1   = as.numeric(Date_SEPTIC1 - Date_ARVKDD1),
-    dfaDIED = as.numeric(Date_DIED1 - Date_ARVKDD1)
-  )
+    dfaDIED = as.numeric(Date_DIED1 - Date_ARVKDD1))
 
+full_new <- full_new %>% 
+  mutate(BDAT = if_else(diaload < 0, Date_ARVDPOT1, BDAT)) %>% 
+  mutate( diaload = as.numeric(Date_GODEER1 - BDAT), 
+    diaARR  = as.numeric(Date_ARVKDD1 - BDAT),     
+    diaW1   = as.numeric(Date_MEASURE1 - BDAT), 
+    diaW2   = as.numeric(Date_MEASURE2 - BDAT))
+
+#weights are still fucked up. Have to fix dates and/or shift birth to wean when appropriate. Or just ommit all the calves who don't have full data. 
 
 
 write.csv(x=full_new, file = "data/datachecks.csv")
 
 
 #now need to define dia1, pneu1, etc and tag animals who were treated prior to transport. 
+
+full_new1<- full_new %>% 
+  mutate(
+   PN1a = if_else(dfaP1>=0, 1, 0) %>% replace_na(0), 
+   PN2 = if_else(dfaP2>=0, 1, 0)%>% replace_na(0),
+   PN3 = if_else(dfaP3>=0, 1, 0) %>% replace_na(0), 
+   DIA1 = ifelse(dfaD1>=0, 1, 0)%>% replace_na(0), 
+   DIA2 = ifelse(dfaD2>=0, 1, 0)%>% replace_na(0), 
+   B1 = ifelse(dfaB1>=0, 1, 0)%>% replace_na(0), 
+   B2 = ifelse(dfaB2>=0, 1, 0)%>% replace_na(0), 
+   N1 = ifelse(dfaN1>=0, 1, 0) %>% replace_na(0),
+   IM1 = ifelse(dfaIM1>=0, 1, 0) %>% replace_na(0),
+   I1 = ifelse(dfaI1 >=0, 1, 0) %>% replace_na(0),
+   L1 = ifelse(dfaL1 >=0, 1, 0) %>% replace_na(0),
+   O1 = ifelse(dfaO1>=0, 1, 0) %>% replace_na(0),
+   Sep1 = ifelse(dfaS1>=0, 1, 0) %>% replace_na(0),
+   DIED = ifelse(dfaDIED>=0, 1, 0)%>% replace_na(0))
+
+
+ full_new1 <- full_new1 %>% 
+  mutate(
+        RESPex = 
+      case_when(is.na(dfaP1) ~ 0,
+                dfaP1<0 ~  1, 
+                dfaP1>= 0 ~ 0)) 
+
+
+ full_new1 <- full_new1 %>% 
+  mutate(
+        DIAex = 
+      case_when(is.na(dfaD1) ~ 0,
+                dfaD1<0 ~  1, 
+                dfaD1>= 0 ~ 0))
+
+ full_new1 <- full_new1 %>% 
+  mutate(
+        navelex = 
+      case_when(is.na(dfaN1) ~ 0,
+                dfaN1<0 ~  1, 
+                dfaN1>= 0 ~ 0)) 
+
+ full_new1 <- full_new1 %>% 
+  mutate(
+        bloatex = 
+      case_when(is.na(dfaB1) ~ 0,
+                dfaB1<0 ~  1, 
+                dfaB1>= 0 ~ 0)) 
+
+ full_new1 <- full_new1 %>% 
+  mutate(
+        illex = 
+      case_when(is.na(dfaIM1) ~ 0,
+                dfaIM1<0 ~  1, 
+                dfaIM1>= 0 ~ 0)) 
+
+
+ full_new1 <- full_new1 %>% 
+  mutate(
+        injuryex = 
+      case_when(is.na(dfaI1) ~ 0,
+                dfaI1<0 ~  1, 
+                dfaI1>= 0 ~ 0))
+
+
+ full_new1 <- full_new1 %>% 
+  mutate(
+        lameex = 
+      case_when(is.na(dfaL1) ~ 0,
+                dfaL1<0 ~  1, 
+                dfaL1>= 0 ~ 0))
+
+
+ full_new1 <- full_new1 %>% 
+  mutate(
+        septicex = 
+      case_when(is.na(dfaS1) ~ 0,
+                dfaS1<0 ~  1, 
+                dfaS1>= 0 ~ 0))
+
+
+ full_new1 <- full_new1 %>% 
+  mutate(
+        diedex = 
+      case_when(is.na(dfaDIED) ~ 0,
+                dfaDIED<0 ~  1, 
+                dfaDIED>= 0 ~ 0)) 
+
+
+ full_new1 %>% 
+   count(RESPex, DIAex, navelex, bloatex, illex, injuryex, lameex, septicex, diedex)
+ 
+ full_new1 <- full_new1 %>% 
+   mutate(trtb4 = 
+     case_when( 
+       RESPex == 1 | DIAex == 1 | navelex == 1 | bloatex == 1 | illex == 1 | injuryex == 1 | lameex == 1 | septicex ==1     ~  1, 
+        RESPex == 0 | DIAex == 0 | navelex == 0 | bloatex == 0 | illex == 0 | injuryex == 0 | lameex == 0 | septicex == 0    ~ 0))
+ 
+ full_new1 %>% 
+   count(trtb4)
+ 
+#remove the calf that was recorded to have died two days before it was born? 
+ 
+full_new1 <- full_new1 %>% 
+  filter(diedex == 0)
+
+
+notrt_before <- full_new1 %>% 
+  filter(!if_any(c(RESPex, DIAex, navelex, bloatex, illex, injuryex, lameex, septicex, diedex), ~ . == 1))
+
+#look at some other things to mess with prior to making final data sets: 
+full_new1 |> 
+  ggplot(mapping=aes(TPROT))+
+  theme_classic()+
+  geom_histogram(binwidth=0.2, 
+                 fill="skyblue", 
+                 color="black", 
+                 alpha=0.7)+
+  labs(title = "Histogram of stp")
+
+
+full_new1|> 
+  ggplot(mapping=aes(x=diaARR))+
+  theme_classic()+
+  geom_histogram(binwidth=1, 
+                 fill="orange", 
+                 color="black", 
+                 alpha=0.7)+
+  labs(title = "Histogram of days in age at arrival")
+
+
+full_new1|> 
+  ggplot(mapping=aes(x=wt1))+
+  theme_classic()+
+  geom_histogram(binwidth=0.2, 
+                 fill="purple", 
+                 color="black", 
+                 alpha=0.7)+
+  labs(title = "Histogram of Depot weight")
+
+full_new1|> 
+  ggplot(mapping=aes(x=wt2))+
+  theme_classic()+
+  geom_histogram(binwidth=0.2, 
+                 fill="pink", 
+                 color="black", 
+                 alpha=0.7)+
+  labs(title = "Histogram of wean weight")
+
+
+
+
+
+FULL <- full_new1 %>% 
+  select (ID, BDAT, SEX, CBRD.y, TPROT, wt1, wt2, LOADfull, comp, SD, diaload, diaARR, trtb4, DIA1, dfaD1, DIAex, Remark_SCOURS1, PN1a, dfaP1, RESPex, Remark_PNEU1, B1, dfaB1, Remark_BLOAT1, bloatex,  N1, dfaN1, Remark_NAVEL1, navelex, IM1, dfaIM1, Remark_ILLMISC1, illex, I1, dfaI1, Remark_INJURY1, injuryex, L1, dfaL1, Remark_LAME1, lameex, Sep1, dfaS1, Remark_SEPTIC1, septicex, DIED, dfaDIED, Remark_DIED1, diedex)
+
+
+EXCLUDE <- notrt_before %>% 
+  select(ID, BDAT, SEX, CBRD.y, TPROT, wt1, wt2, LOADfull, comp, SD, diaload, diaARR, DIA1, dfaD1, Remark_SCOURS1, PN1a, dfaP1, Remark_PNEU1, B1, dfaB1, Remark_BLOAT1, N1, dfaN1, Remark_NAVEL1, IM1, dfaIM1, Remark_ILLMISC1, I1, dfaI1, Remark_INJURY1, L1, dfaL1, Remark_LAME1, Sep1, dfaS1, Remark_SEPTIC1, DIED, dfaDIED, Remark_DIED1)
+
+write.csv(x=FULL, file = 'data/FULL.csv')
+write.csv(x=EXCLUDE, file = 'data/EXCLUDE.csv')
+
+
 ```
