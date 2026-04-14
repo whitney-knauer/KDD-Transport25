@@ -1,0 +1,7 @@
+"0",""
+"0",""
+"0","comp %>% "
+"0","  ggplot(aes(x=as.factor(comp), y=n, color = as.factor(comp)))+"
+"0","  geom_boxplot()+"
+"0","  geom_jitter() + "
+"0","  theme_classic()"

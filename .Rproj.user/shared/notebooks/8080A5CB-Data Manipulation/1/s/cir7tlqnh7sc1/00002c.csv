@@ -1,0 +1,7 @@
+"0",""
+"0","EXCLUDE %>% "
+"0","  group_by(DED30) %>% "
+"0","  summarize("
+"0","    count = n(), "
+"0","    mean = mean(DIED30), "
+"0","    sd = sd(DIED30))"
