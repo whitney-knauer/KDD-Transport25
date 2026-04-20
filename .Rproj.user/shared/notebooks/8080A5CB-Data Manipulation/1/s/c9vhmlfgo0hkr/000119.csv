@@ -1,0 +1,6 @@
+"0",""
+"0","write.csv(x=disease, file = 'data/disease.csv')"
+"0","#want to do this again after getting rid of stuff that happened later (after 60d)"
+"0",""
+"0","EXCLUDE %>% "
+"0","  count(DIA1, missing_age = is.na(dfaD1))"

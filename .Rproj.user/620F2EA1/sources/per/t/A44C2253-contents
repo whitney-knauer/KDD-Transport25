@@ -1,0 +1,209 @@
+---
+title: "Analysis"
+author: "wk"
+date: "2026-04-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#| include: false
+#| warning: false
+#| echo: false
+
+library(epiDisplay)
+library(knitr)
+library(pROC)
+library(tidyverse)
+library(readxl)
+library(ggplot2)
+library(gmodels)
+library(ggbeeswarm)
+library(dplyr)
+library(readr)
+library(ggpubr)
+library(psych)
+library(lme4)
+library(Matrix)
+library(lmerTest)
+library(irr)
+library(lmerTest)
+library(emmeans)
+library(doBy)       
+library(gmodels)    
+library(car)           
+library(cowplot)       
+library(gridGraphics)  
+library(multcomp)
+library(hms)
+library(gt)
+library(lubridate)
+library(nlme)
+library(extrafont)
+```
+
+### Data Steps
+
+```{r}
+#| include: false
+#| warning: false
+#| echo: false
+
+
+full <- read.csv('data/FULL.csv')
+
+
+
+```
+
+### Data Description
+
+```{r}
+#| warning: false
+
+#37985 total calves in the data set
+
+full %>% 
+  group_by(SEX) %>% 
+  count()
+
+#31526 heifers and 6459 male calves
+
+
+full %>% 
+  group_by(CBRD) %>% 
+  count()
+
+full %>% 
+  group_by(month) %>% 
+  count()
+
+full %>% 
+  group_by(as.factor(comp)) %>% 
+  count()
+
+
+full |> 
+  ggplot(mapping=aes(TPROT))+
+  theme_classic()+
+  geom_histogram(binwidth=0.2, 
+                 fill="purple3", 
+                 color="black", 
+                 alpha=0.7)+
+  labs(title = "Histogram of stp")
+
+
+full |> 
+  ggplot(mapping=aes(diaM1_clean))+
+  theme_classic()+
+  geom_histogram(binwidth=0.2, 
+                 fill="skyblue", 
+                 color="black", 
+                 alpha=0.7)+
+  labs(title = "Histogram of diaM1")
+
+
+full |> 
+  ggplot(mapping=aes(diaM2_clean))+
+  theme_classic()+
+  geom_histogram(binwidth=0.2, 
+                 fill="skyblue", 
+                 color="black", 
+                 alpha=0.7)+
+  labs(title = "Histogram of diaM2")
+
+
+
+full |> 
+  ggplot(mapping=aes(wt1_clean))+
+  theme_classic()+
+  geom_histogram(binwidth=5, 
+                 fill="red4", 
+                 color="black", 
+                 alpha=0.7)+
+  labs(title = "Histogram of wt1")
+
+
+
+full |> 
+  ggplot(mapping=aes(wt2_clean))+
+  theme_classic()+
+  geom_histogram(binwidth=5, 
+                 fill="red4", 
+                 color="black", 
+                 alpha=0.7)+
+  labs(title = "Histogram of wt2")
+
+
+
+full |> 
+  ggplot(mapping=aes(adg))+
+  theme_classic()+
+  geom_histogram(binwidth=0.1, 
+                 fill="wheat", 
+                 color="black", 
+                 alpha=0.7)+
+  labs(title = "Histogram of adg (kg/d)")
+
+```
+
+#### Question: Are baseline characteristics of calves different by 1) different compartments; and 2) different SD quartiles (using quart_custom)? 
+
+![](images/trailer compartments-01.png)
+
+```{r}
+#| warning: false
+
+full %>% 
+  group_by(as.factor(comp)) %>% 
+  summarize(
+    stp = mean(TPROT, na.rm=TRUE), 
+    diaM1 = mean(diaM1_clean, na.rm=TRUE), 
+    wt1 = mean(wt1_clean, na.rm=TRUE), 
+    diaload = mean(diaload, na.rm=TRUE))
+
+table(full$comp, full$SEX)
+table(full$comp, full$CBRD)
+table(full$comp, full$month)
+
+lm_1 <- lm(TPROT ~ as.factor(comp), data=full)
+summary(lm_1)
+
+lm_2 <- lm(diaM1_clean ~ as.factor(comp), data=full)
+summary(lm_2)
+
+lm_3 <- lm(wt1_clean ~ as.factor(comp), data=full)
+summary(lm_3)
+
+lm_4 <- lm(diaload ~ as.factor(comp), data=full)
+summary(lm_4)
+
+
+
+
+
+
+full %>% 
+  group_by(quart_custom) %>% 
+  summarize(
+    stp = mean(TPROT, na.rm=TRUE), 
+    diaM1 = mean(diaM1_clean, na.rm=TRUE), 
+    wt1 = mean(wt1_clean, na.rm=TRUE), 
+    diaload = mean(diaload, na.rm=TRUE))
+
+
+lm_1 <- lm(TPROT ~ quart_custom, data=full)
+summary(lm_1)
+
+lm_2 <- lm(diaM1_clean ~ quart_custom, data=full)
+summary(lm_2)
+
+lm_3 <- lm(wt1_clean ~ quart_custom, data=full)
+summary(lm_3)
+
+lm_4 <- lm(diaload ~ quart_custom, data=full)
+summary(lm_4)
+```

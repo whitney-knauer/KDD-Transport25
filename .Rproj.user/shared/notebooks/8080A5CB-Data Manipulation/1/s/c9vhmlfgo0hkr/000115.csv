@@ -1,0 +1,5 @@
+"0",""
+"0","#majority in the first 100d. "
+"0",""
+"0","EXCLUDE %>% "
+"0"," summarize(across(c(DIA1, PN1a, B1, N1, IM1, I1, L1, Sep1, DIED), sum, na.rm=TRUE ))"
