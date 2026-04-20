@@ -1,0 +1,6 @@
+"0",""
+"0","write.csv(x = datachecks, file = ""data/trailer loads comp.csv"")"
+"0","write.csv(x=datachecks1, file = ""data/trailer load.csv"")"
+"0","write.csv(x=full_dates, file = ""data/checks.csv"")"
+"0",""
+"0",""

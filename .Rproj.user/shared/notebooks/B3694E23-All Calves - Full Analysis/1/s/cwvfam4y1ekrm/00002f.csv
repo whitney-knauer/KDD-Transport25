@@ -1,0 +1,7 @@
+"0",""
+"0","FINAL_Analysis %>% "
+"0","  group_by(SD, DB) %>% "
+"0","  summarize("
+"0","    count = n(),"
+"0","    prop_DED1 = mean(D30yn, na.rm=TRUE), "
+"0","    sum_DED1  = sum(D30yn, na.rm=TRUE))"

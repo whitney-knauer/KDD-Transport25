@@ -1,0 +1,5 @@
+"0",""
+"0","FINAL7_new %>% "
+"0","  group_by(Remark_PNEU1, DB) %>% "
+"0","  summarize("
+"0","    dfaP1 = mean(dfaP1))"

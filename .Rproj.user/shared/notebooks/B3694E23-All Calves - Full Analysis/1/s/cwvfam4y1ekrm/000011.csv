@@ -1,0 +1,8 @@
+"0",""
+"0","FINAL_Analysis %>% "
+"0","  filter(diaex == 0) %>% "
+"0","  group_by(SD, DB) %>% "
+"0","  summarize("
+"0","    count = n(),"
+"0","    prop_DIA = mean(DIA1, na.rm=TRUE), "
+"0","    sum_DIA  = sum(DIA1, na.rm=TRUE))"

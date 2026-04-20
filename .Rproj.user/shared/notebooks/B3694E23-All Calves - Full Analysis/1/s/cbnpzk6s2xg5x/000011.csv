@@ -1,0 +1,6 @@
+"0",""
+"0",""
+"0","FINAL7_new %>% "
+"0","  summarize ("
+"0","    meanage = mean(diaload), "
+"0","    sdage = sd (diaload))"

@@ -1,0 +1,6 @@
+"0",""
+"0","FULL <- EXCLUDE %>% "
+"0","   select(ID, BDAT, SRCE, SEX, CBRD, TPROT, diaM1_clean, wt1_clean, diaM2_clean, wt2_clean, adg, LOADfull, month, comp, SD, diaload, diaARR, quartile, quart_custom, DIAR30, D30, PNEU30, P30, PNEU60, P60, BLOAT30, B30, NAVAL30, NAV30, ILLMISC30, IM30, INJURY10, I10, LAME10, L10, SEPSIS30, S30, DIED30, DED30, DIED60, DED60)"
+"0",""
+"0","write.csv(x=FULL, file = 'data/FULL.csv')"
+"0",""

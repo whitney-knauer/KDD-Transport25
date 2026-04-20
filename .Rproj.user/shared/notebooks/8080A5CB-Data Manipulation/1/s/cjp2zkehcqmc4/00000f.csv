@@ -31,3 +31,4 @@
 "0","library(lubridate)"
 "0","library(nlme)"
 "0","library(extrafont)"
+"0","library(stringr)"

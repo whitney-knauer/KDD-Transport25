@@ -4,6 +4,8 @@
 "0",""
 "0",""
 "0","full <- read.csv('data/FULL.csv')"
+"0","full$comp = as.factor(full$comp)"
+"0","full$SRCE = as.factor(full$SRCE)"
 "0",""
 "0",""
 "0",""

@@ -1,0 +1,7 @@
+"0",""
+"0","FINAL7_new %>% "
+"0","  filter (navelex == 1) %>% "
+"0","  group_by(SD) %>% "
+"0","  summarize("
+"0","  prop_N = sum(N1, na.rm=TRUE), "
+"0","    meandfaN1 = mean(dfaN1, na.rm=TRUE))"

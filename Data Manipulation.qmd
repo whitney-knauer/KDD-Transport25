@@ -39,6 +39,7 @@ library(gt)
 library(lubridate)
 library(nlme)
 library(extrafont)
+library(stringr)
 ```
 
 ## Data Steps
@@ -280,8 +281,9 @@ comp|>
 full_comp <- full_dates %>% 
   inner_join(comp, by = "LOAD")
 
-#inner join goes from 41965 to 41661
+#inner join goes from 41878 to 41578
 
+#needed to add plus one so that didn't have 0's, which indicated that calves were treated on the day they arrived. Thus, all days will be 1 - x with day 1 being the day of arrival at KDD.
 full_new <- full_comp %>%
   mutate(across(c(BDAT, starts_with("Date_")), 
          ~ as.Date(parse_date_time(trimws(as.character(.x)), orders = c("mdy", "dmy", "ymd"))))) %>%
@@ -290,23 +292,23 @@ full_new <- full_comp %>%
     diaM2   = as.numeric(Date_MEASURE2 - BDAT),
     diaload = as.numeric(Date_GODEER1 - BDAT), 
     diaARR  = as.numeric(diaload+1), 
-    dfaP1   = as.numeric(Date_PNEU1 - Date_ARVKDD1),
-    dbtwP12 = as.numeric(Date_PNEU2 - Date_PNEU1),
-    dbtwP23 = as.numeric(Date_PNEU3 - Date_PNEU2),
-    dfaP2   = as.numeric(Date_PNEU2 - Date_ARVKDD1), 
-    dfaP3   = as.numeric(Date_PNEU3 - Date_ARVKDD1), 
-    dfaD1   = as.numeric(Date_SCOURS1 - Date_ARVKDD1),
-    dfaD2   = as.numeric(Date_SCOURS2 - Date_ARVKDD1), 
-    dbtwD12 = as.numeric(Date_SCOURS2 - Date_SCOURS1),
-    dfaB1   = as.numeric(Date_BLOAT1 - Date_ARVKDD1), 
-    dfaB2   = as.numeric(Date_BLOAT2 - Date_ARVKDD1), 
-    dfaN1   = as.numeric(Date_NAVEL1 - Date_ARVKDD1), 
-    dfaIM1  = as.numeric(Date_ILLMISC1 - Date_ARVKDD1),
-    dfaI1   = as.numeric(Date_INJURY1 - Date_ARVKDD1),
-    dfaL1   = as.numeric(Date_LAME1 - Date_ARVKDD1), 
-    dfaO1   = as.numeric(Date_OTITIS1 - Date_ARVKDD1), 
-    dfaS1   = as.numeric(Date_SEPTIC1 - Date_ARVKDD1),
-    dfaDIED = as.numeric(Date_DIED1 - Date_ARVKDD1))
+    dfaP1   = as.numeric(Date_PNEU1 - Date_ARVKDD1 +1),
+    dbtwP12 = as.numeric(Date_PNEU2 - Date_PNEU1+1),
+    dbtwP23 = as.numeric(Date_PNEU3 - Date_PNEU2+1),
+    dfaP2   = as.numeric(Date_PNEU2 - Date_ARVKDD1+1), 
+    dfaP3   = as.numeric(Date_PNEU3 - Date_ARVKDD1+1), 
+    dfaD1   = as.numeric(Date_SCOURS1 - Date_ARVKDD1+1),
+    dfaD2   = as.numeric(Date_SCOURS2 - Date_ARVKDD1+1), 
+    dbtwD12 = as.numeric(Date_SCOURS2 - Date_SCOURS1+1),
+    dfaB1   = as.numeric(Date_BLOAT1 - Date_ARVKDD1+1), 
+    dfaB2   = as.numeric(Date_BLOAT2 - Date_ARVKDD1+1), 
+    dfaN1   = as.numeric(Date_NAVEL1 - Date_ARVKDD1+1), 
+    dfaIM1  = as.numeric(Date_ILLMISC1 - Date_ARVKDD1+1),
+    dfaI1   = as.numeric(Date_INJURY1 - Date_ARVKDD1+1),
+    dfaL1   = as.numeric(Date_LAME1 - Date_ARVKDD1+1), 
+    dfaO1   = as.numeric(Date_OTITIS1 - Date_ARVKDD1+1), 
+    dfaS1   = as.numeric(Date_SEPTIC1 - Date_ARVKDD1+1),
+    dfaDIED = as.numeric(Date_DIED1 - Date_ARVKDD1+1))
 
 full_new <- full_new %>% 
   mutate(BDAT = if_else(diaload < 0, Date_ARVDPOT1, BDAT)) %>% 
@@ -427,7 +429,7 @@ full_new1<- full_new %>%
 full_new1 <- full_new1 %>% 
   filter(diedex == 0)
 
-
+#has 38204 calves in it
 notrt_before <- full_new1 %>% 
   filter(!if_any(c(RESPex, DIAex, navelex, bloatex, illex, injuryex, lameex, septicex, diedex), ~ . == 1))
 
@@ -479,7 +481,7 @@ full_new1|>
 FULL <- full_new1 %>% 
   select (ID, BDAT, SEX, CBRD.y, TPROT, diaM1, wt1, diaM2, wt2, LOADfull, month.x, comp, SD, diaload, diaARR, trtb4, DIA1, dfaD1, DIAex, Remark_SCOURS1, PN1a, dfaP1, RESPex, Remark_PNEU1, B1, dfaB1, Remark_BLOAT1, bloatex,  N1, dfaN1, Remark_NAVEL1, navelex, IM1, dfaIM1, Remark_ILLMISC1, illex, I1, dfaI1, Remark_INJURY1, injuryex, L1, dfaL1, Remark_LAME1, lameex, Sep1, dfaS1, Remark_SEPTIC1, septicex, DIED, dfaDIED, Remark_DIED1, diedex)
 
-
+#n=38005 animals in the EXCLUDE Data set (from 38204 in no treat before - remove 199 with weird days at arrival). 
 EXCLUDE <- notrt_before %>% 
   filter(diaARR<=7) %>% #removes 68 older than 7d at arrival and 131NAs
   select(ID, BDAT, SEX, CBRD.y, TPROT, diaM1, wt1, diaM2, wt2, LOADfull, month.x, comp, SD, diaload, diaARR, DIA1, dfaD1, Remark_SCOURS1, PN1a, dfaP1, Remark_PNEU1, B1, dfaB1, Remark_BLOAT1, N1, dfaN1, Remark_NAVEL1, IM1, dfaIM1, Remark_ILLMISC1, I1, dfaI1, Remark_INJURY1, L1, dfaL1, Remark_LAME1, Sep1, dfaS1, Remark_SEPTIC1, DIED, dfaDIED, Remark_DIED1)
@@ -531,7 +533,7 @@ EXCLUDE %>%
 
 ### EXCLUDE data set
 
-(n=38184 calves who were transported from 11/12/24 to 11/12/25)
+(n=38005 calves who were transported from 11/12/24 to 11/12/25)
 
 Questions:
 
@@ -595,11 +597,16 @@ EXCLUDE<- EXCLUDE %>%
     wtgain = wt2_clean  - wt1_clean, 
     adg = (wtgain/days)/2.2)
 
+EXCLUDE <- EXCLUDE %>%
+  mutate(SRCE = str_sub(ID, 1, 2))
+
 ```
 
-2.  What to do with calves who arrive dat is long (\> 7d of age at arrival)? Likely that calves who were delayed transport were not normal for some reason. **There are n=68 animals plus NAs, so It's probably OK to exclude them**. What about the compartment those calves were transported in? Reasonable to expect that those calves were not too big and didn't skew the SD too much?
+2.  What to do with calves who arrive dat is long (\> 7d of age at arrival)? Likely that calves who were delayed transport were not normal for some reason. **There are n=68 animals plus NAs (199 total), so It's probably OK to exclude them**. What about the compartment those calves were transported in? Reasonable to expect that those calves were not too big and didn't skew the SD too much?
 
 3.  What about total proteins? There are some that are not believable including some under 3 and some over 9 (up to 12!). Am going to exclude those? Maybe or maybe not? Are the 12 ones dehydrated? They're all done at the depot, so would be more plausible that they are wonky for other reasons?
+
+4.  What about source farm? the first two digits represent the source farm unique identifier. Will add that as a variable in the code above in the "EXCLUDE" data set.
 
 Need to add a bunch of variables for timing and to set up the data set a bit better.
 
@@ -901,7 +908,7 @@ Should probably add week into the final data set. Also, what about the unique id
 ```{r}
 
 FULL <- EXCLUDE %>% 
-   select(ID, BDAT, SEX, CBRD, TPROT, diaM1_clean, wt1_clean, diaM2_clean, wt2_clean, adg, LOADfull, month, comp, SD, diaload, diaARR, quartile, quart_custom, DIAR30, D30, PNEU30, P30, PNEU60, P60, BLOAT30, B30, NAVAL30, NAV30, ILLMISC30, IM30, INJURY10, I10, LAME10, L10, SEPSIS30, S30, DIED30, DED30, DIED60, DED60)
+   select(ID, BDAT, SRCE, SEX, CBRD, TPROT, diaM1_clean, wt1_clean, diaM2_clean, wt2_clean, adg, LOADfull, month, comp, SD, diaload, diaARR, quartile, quart_custom, DIAR30, D30, PNEU30, P30, PNEU60, P60, BLOAT30, B30, NAVAL30, NAV30, ILLMISC30, IM30, INJURY10, I10, LAME10, L10, SEPSIS30, S30, DIED30, DED30, DIED60, DED60)
 
 write.csv(x=FULL, file = 'data/FULL.csv')
 

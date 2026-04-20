@@ -1,0 +1,206 @@
+---
+title: "STP for fun"
+author: "WAK"
+format: html
+editor: visual
+---
+
+```{r}
+#| include: false
+#| warning: false
+#| echo: false
+
+library(epiDisplay)
+library(knitr)
+library(pROC)
+library(tidyverse)
+library(readxl)
+library(ggplot2)
+library(gmodels)
+library(ggbeeswarm)
+library(dplyr)
+library(readr)
+library(ggpubr)
+library(psych)
+library(lme4)
+library(Matrix)
+library(lmerTest)
+library(irr)
+library(lmerTest)
+library(emmeans)
+library(doBy)       
+library(gmodels)    
+library(car)           
+library(cowplot)       
+library(gridGraphics)  
+library(multcomp)
+library(hms)
+library(gt)
+library(lubridate)
+library(nlme)
+library(extrafont)
+library(survival)
+library(survminer)
+library(patchwork)
+library(coxme)
+library(marginaleffects)
+```
+
+### Data Steps
+
+```{r}
+#| include: false
+#| warning: false
+#| echo: false
+
+
+full <- read.csv('data/FULL.csv')
+full$comp = as.factor(full$comp)
+
+
+#create STP categories
+
+full <- full %>%
+  mutate(stp_qrt = case_when(
+    TPROT < 5.1 ~ "Poor",
+    TPROT >= 5.1 & TPROT <= 5.7 ~ "Fair",
+    TPROT >= 5.8 & TPROT <= 6.1 ~ "Good",
+    TPROT > 6.2 ~ "Excellent",
+    TRUE ~ "Other"))
+
+full %>% 
+  group_by(stp_qrt) %>% 
+  filter(stp_qrt!="Other") %>% 
+  count()
+
+
+```
+
+### Outcomes based on STP categories
+
+```{r}
+
+no_other <- full %>% 
+  filter(stp_qrt!="Other")
+
+
+#60d Death
+surv_obj <- Surv(
+  time  = no_other$DIED60,
+  event = no_other$DED60)
+
+fit <- survfit(
+  surv_obj ~ stp_qrt,
+  data = no_other)
+
+ggsurvplot(
+  fit,
+  data = no_other,
+  pval = TRUE,
+  pval.coord = c(5, 0.8),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Survival Probability",
+  xlim = c(0, 60),
+  ylim = c(0.8, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+#30d Death
+
+surv_obj <- Surv(
+  time  = no_other$DIED30,
+  event = no_other$DED30)
+
+fit <- survfit(
+  surv_obj ~ stp_qrt,
+  data = no_other)
+
+ggsurvplot(
+  fit,
+  data = no_other,
+  pval = TRUE,
+  pval.coord = c(5, 0.8),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Survival Probability",
+  xlim = c(0, 30),
+  ylim = c(0.8, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+#30d scours
+
+surv_obj <- Surv(
+  time  = no_other$DIAR30,
+  event = no_other$D30)
+
+fit <- survfit(
+  surv_obj ~ stp_qrt,
+  data = no_other)
+
+ggsurvplot(
+  fit,
+  data = no_other,
+  pval = TRUE,
+  pval.coord = c(5, 0.8),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Scours Treatment Survival Probability",
+  xlim = c(0, 30),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+#30d pneu
+surv_obj <- Surv(
+  time  = no_other$PNEU30,
+  event = no_other$P30)
+
+fit <- survfit(
+  surv_obj ~ stp_qrt,
+  data = no_other)
+
+ggsurvplot(
+  fit,
+  data = no_other,
+  pval = TRUE,
+  pval.coord = c(5, 0.8),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Resp Treatment Survival Probability",
+  xlim = c(0, 30),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+#60d pneu
+
+surv_obj <- Surv(
+  time  = no_other$PNEU60,
+  event = no_other$P60)
+
+fit <- survfit(
+  surv_obj ~ stp_qrt,
+  data = no_other)
+
+ggsurvplot(
+  fit,
+  data = no_other,
+  pval = TRUE,
+  pval.coord = c(5, 0.8),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Resp Treatment Survival Probability",
+  xlim = c(0, 60),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+```

@@ -1,0 +1,7 @@
+"0",""
+"0","full %>% "
+"0","  group_by(DED60) %>% "
+"0","  summarize("
+"0","    count = n(), "
+"0","    mean = mean(DIED60), "
+"0","    sd = sd(DIED60))"

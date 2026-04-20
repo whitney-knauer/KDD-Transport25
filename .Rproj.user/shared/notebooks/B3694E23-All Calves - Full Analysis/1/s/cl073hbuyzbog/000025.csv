@@ -1,0 +1,7 @@
+"0",""
+"0",""
+"0","FINAL7_new %>% "
+"0","  filter(dfaN1>=0) %>% "
+"0","  summarize("
+"0","    mean = mean(dfaN1), "
+"0","    sd = sd (dfaN1))"

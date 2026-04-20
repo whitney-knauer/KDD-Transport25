@@ -1,0 +1,6 @@
+"0",""
+"0","FINAL_Analysis %>% "
+"0","  filter(diaex == 0) %>% "
+"0","  group_by(Remark_SCOURS1, DB) %>% "
+"0","  summarize("
+"0","    count = n())"

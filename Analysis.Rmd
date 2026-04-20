@@ -43,6 +43,11 @@ library(gt)
 library(lubridate)
 library(nlme)
 library(extrafont)
+library(survival)
+library(survminer)
+library(patchwork)
+library(coxme)
+library(marginaleffects)
 ```
 
 ### Data Steps
@@ -54,6 +59,8 @@ library(extrafont)
 
 
 full <- read.csv('data/FULL.csv')
+full$comp = as.factor(full$comp)
+full$SRCE = as.factor(full$SRCE)
 
 
 
@@ -64,13 +71,13 @@ full <- read.csv('data/FULL.csv')
 ```{r}
 #| warning: false
 
-#37985 total calves in the data set
+#38005 total calves in the data set
 
 full %>% 
   group_by(SEX) %>% 
   count()
 
-#31526 heifers and 6459 male calves
+#31545 heifers and 6460 male calves
 
 
 full %>% 
@@ -82,7 +89,23 @@ full %>%
   count()
 
 full %>% 
-  group_by(as.factor(comp)) %>% 
+  group_by(comp) %>% 
+  count()
+
+full %>% 
+  group_by(LOADfull) %>% 
+  count()
+
+full %>% 
+  group_by(SRCE) %>% 
+  count()
+
+full %>% 
+  group_by(quart_custom) %>% 
+  count()
+
+full %>% 
+  group_by(comp, quart_custom) %>% 
   count()
 
 
@@ -150,9 +173,9 @@ full |>
 
 ```
 
-#### Question: Are baseline characteristics of calves different by 1) different compartments; and 2) different SD quartiles (using quart_custom)? 
+#### Question: Are baseline characteristics of calves different by 1) different compartments; and 2) different SD quartiles (using quart_custom) 3) source farm?
 
-![](images/trailer compartments-01.png)
+![](images/trailer%20compartments-01.png)
 
 ```{r}
 #| warning: false
@@ -206,4 +229,2044 @@ summary(lm_3)
 
 lm_4 <- lm(diaload ~ quart_custom, data=full)
 summary(lm_4)
+
+
+
+full %>% 
+  group_by(SRCE) %>% 
+  count()
+
+full %>% 
+  group_by(SRCE) %>% 
+  summarize(
+    stp = mean(TPROT, na.rm=TRUE), 
+    diaM1 = mean(diaM1_clean, na.rm=TRUE), 
+    wt1 = mean(wt1_clean, na.rm=TRUE), 
+    diaload = mean(diaload, na.rm=TRUE))
+
+table(full$SRCE, full$SEX)
+table(full$SRCE, full$CBRD)
+table(full$SRCE, full$month)
+
+lm_1 <- lm(TPROT ~ as.factor(SRCE), data=full)
+summary(lm_1)
+
+lm_2 <- lm(diaM1_clean ~ as.factor(SRCE), data=full)
+summary(lm_2)
+
+lm_3 <- lm(wt1_clean ~ as.factor(SRCE), data=full)
+summary(lm_3)
+
+lm_4 <- lm(diaload ~ as.factor(SRCE), data=full)
+summary(lm_4)
+```
+
+Pretty much all baseline characteristics are statistically significantly different between groups. However, a difference in days in age at movement or measure of 0.02 is not that important to me. Thus, I am comfortable that pretty much all baseline characteristics are similar.
+
+Not sure entirely what to do with the source farms that were starting up or did not send calves on some months. Might mess up eventual model building so might have to exclude those calves? But if controlling for source farm as a random effect it might be OK? **If I got rid of the farms that did not have at least 1 calf per month (29, 34, 40, 62) that would represent 2023 calves or 5% of total data.**
+
+#### Health Data
+
+##### Frequencies
+
+By each category, what is the average days post arrival for each disease? Also need to do this by compartment and by SD quartile.
+
+```{r}
+#| warning: false
+
+full %>% 
+  group_by(D30) %>% 
+  summarize(
+    count = n(), 
+    mean = mean(DIAR30), 
+    sd = sd(DIAR30))
+
+
+full %>% 
+  group_by(P30) %>% 
+  summarize(
+    count = n(), 
+    mean = mean(PNEU30), 
+    sd = sd(PNEU30))
+
+full %>% 
+  group_by(P60) %>% 
+  summarize(
+    count = n(), 
+    mean = mean(PNEU60), 
+    sd = sd(PNEU60))
+
+full %>% 
+  group_by(NAV30) %>% 
+  summarize(
+    count = n(), 
+    mean = mean(NAVAL30), 
+    sd = sd(NAVAL30))
+
+
+full %>% 
+  group_by(B30) %>% 
+  summarize(
+    count = n(), 
+    mean = mean(BLOAT30), 
+    sd = sd(BLOAT30))
+
+full %>% 
+  group_by(IM30) %>% 
+  summarize(
+    count = n(), 
+    mean = mean(ILLMISC30), 
+    sd = sd(ILLMISC30))
+
+full %>% 
+  group_by(I10) %>% 
+  summarize(
+    count = n(), 
+    mean = mean(INJURY10), 
+    sd = sd(INJURY10))
+
+full %>% 
+  group_by(L10) %>% 
+  summarize(
+    count = n(), 
+    mean = mean(LAME10), 
+    sd = sd(LAME10))
+
+full %>% 
+  group_by(S30) %>% 
+  summarize(
+    count = n(), 
+    mean = mean(SEPSIS30), 
+    sd = sd(SEPSIS30))
+
+full %>% 
+  group_by(S30, comp) %>% 
+  summarize(
+    count = n(), 
+    mean = mean(SEPSIS30), 
+    sd = sd(SEPSIS30))
+
+full %>% 
+  group_by(DED30) %>% 
+  summarize(
+    count = n(), 
+    mean = mean(DIED30), 
+    sd = sd(DIED30))
+
+full %>% 
+  group_by(DED60) %>% 
+  summarize(
+    count = n(), 
+    mean = mean(DIED60), 
+    sd = sd(DIED60))
+
+```
+
+##### Health x Main Outcomes of interest
+
+```{r}
+#| warning: false
+
+#compartment
+
+summary_table1 <- full %>% 
+  group_by(comp) %>% 
+  summarize(
+    total_n = n(),
+    prop_D30 = mean(D30 == 1, na.rm = TRUE), 
+    prop_P30 = mean(P30 == 1, na.rm = TRUE), 
+    prop_P60 = mean(P60 == 1, na.rm = TRUE), 
+    prop_B30 = mean(B30 == 1, na.rm = TRUE), 
+    prop_NAV = mean(NAV30 == 1, na.rm = TRUE), 
+    prop_IM30 = mean(IM30 == 1, na.rm = TRUE), 
+    prop_I10 = mean(I10 == 1, na.rm = TRUE), 
+    prop_L10 = mean(L10 == 1, na.rm = TRUE), 
+    prop_S30 = mean(S30 == 1, na.rm = TRUE), 
+    prop_Dead30 = mean(DED30 == 1, na.rm = TRUE), 
+    prop_Dead60 = mean(DED60 == 1, na.rm = TRUE))
+
+
+summary_table2 <- full %>% 
+  group_by(quart_custom) %>% 
+  summarize(
+    total_n = n(),
+    prop_D30 = mean(D30 == 1, na.rm = TRUE), 
+    prop_P30 = mean(P30 == 1, na.rm = TRUE), 
+    prop_P60 = mean(P60 == 1, na.rm = TRUE), 
+    prop_B30 = mean(B30 == 1, na.rm = TRUE), 
+    prop_NAV = mean(NAV30 == 1, na.rm = TRUE), 
+    prop_IM30 = mean(IM30 == 1, na.rm = TRUE), 
+    prop_I10 = mean(I10 == 1, na.rm = TRUE), 
+    prop_L10 = mean(L10 == 1, na.rm = TRUE), 
+    prop_S30 = mean(S30 == 1, na.rm = TRUE), 
+    prop_Dead30 = mean(DED30 == 1, na.rm = TRUE), 
+    prop_Dead60 = mean(DED60 == 1, na.rm = TRUE))
+
+
+
+summary_table3 <- full %>% 
+  group_by(month) %>% 
+  summarize(
+    total_n = n(),
+    prop_D30 = mean(D30 == 1, na.rm = TRUE), 
+    prop_P30 = mean(P30 == 1, na.rm = TRUE), 
+    prop_P60 = mean(P60 == 1, na.rm = TRUE), 
+    prop_B30 = mean(B30 == 1, na.rm = TRUE), 
+    prop_NAV = mean(NAV30 == 1, na.rm = TRUE), 
+    prop_IM30 = mean(IM30 == 1, na.rm = TRUE), 
+    prop_I10 = mean(I10 == 1, na.rm = TRUE), 
+    prop_L10 = mean(L10 == 1, na.rm = TRUE), 
+    prop_S30 = mean(S30 == 1, na.rm = TRUE), 
+    prop_Dead30 = mean(DED30 == 1, na.rm = TRUE), 
+    prop_Dead60 = mean(DED60 == 1, na.rm = TRUE))
+
+summary_table4 <- full %>% 
+  filter(stp_qrt!= "Other") %>% 
+  group_by(stp_qrt) %>% 
+  summarize(
+    total_n = n(),
+    prop_D30 = mean(D30 == 1, na.rm = TRUE), 
+    prop_P30 = mean(P30 == 1, na.rm = TRUE), 
+    prop_P60 = mean(P60 == 1, na.rm = TRUE), 
+    prop_B30 = mean(B30 == 1, na.rm = TRUE), 
+    prop_NAV = mean(NAV30 == 1, na.rm = TRUE), 
+    prop_IM30 = mean(IM30 == 1, na.rm = TRUE), 
+    prop_I10 = mean(I10 == 1, na.rm = TRUE), 
+    prop_L10 = mean(L10 == 1, na.rm = TRUE), 
+    prop_S30 = mean(S30 == 1, na.rm = TRUE), 
+    prop_Dead30 = mean(DED30 == 1, na.rm = TRUE), 
+    prop_Dead60 = mean(DED60 == 1, na.rm = TRUE))
+
+```
+
+#### Continuous Outcome
+
+ADG (should I take outcomes out to 90d?), association with month, comp, quart_custom? Or other baseline characteristics?
+
+```{r}
+#| warning: false
+
+full %>% 
+  group_by(month) %>% 
+  summarize(
+    adg = mean (adg, na.rm=TRUE))
+
+lm_1 <- lm(adg ~ month, data=full)
+summary(lm_1)
+
+#grew better in the winter, worse in the summer
+
+full %>% 
+  group_by(comp) %>% 
+  summarize(
+    adg = mean (adg, na.rm=TRUE))
+
+lm_2 <- lm(adg ~ comp, data=full)
+summary(lm_2)
+
+#yes significant but nothing I'm particularly worried about
+
+full %>% 
+  group_by(quart_custom) %>% 
+  summarize(
+    adg = mean (adg, na.rm=TRUE))
+
+lm_3 <- lm(adg ~ quart_custom, data=full)
+summary(lm_3)
+
+#yes significant but nothing I'm particularly worried about
+
+full %>% 
+  group_by(SEX) %>% 
+  summarize(
+    adg = mean (adg, na.rm=TRUE))
+
+lm_4 <- lm(adg ~ SEX, data=full)
+summary(lm_4)
+
+#yes, bull calves or male castrated calves grew better than female calves
+
+full %>% 
+  group_by(CBRD) %>% 
+  summarize(
+    adg = mean (adg, na.rm=TRUE))
+
+lm_5 <- lm(adg ~ CBRD, data=full)
+summary(lm_5)
+
+
+
+```
+
+### KM Curves for Morbidity and Mortality
+
+1.  Compartment
+
+2.  SD
+
+3.  Month
+
+4.  Load
+
+5.  Sex
+
+6.  Breed
+
+7.  Source Farm
+
+#### 30d SCOURS
+
+```{r}
+
+surv_obj <- Surv(
+  time  = full$DIAR30,
+  event = full$D30)
+
+#by compartment
+fit <- survfit(
+  surv_obj ~ comp,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Scours Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+table(full$D30)
+
+
+#by stocking density quartile
+
+fit <- survfit(
+  surv_obj ~ quart_custom,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Scours Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+
+#month
+
+fit <- survfit(
+  surv_obj ~ month,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Scours Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+
+
+#by distinct load
+fit <- survfit(
+  surv_obj ~ LOADfull,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Scours Treatment Survival Probability",
+  xlim = c(0, 28),
+  legend = "none",
+  break.time.by = 7)
+
+#HUGE Variation!!!!
+
+
+
+#sex
+fit <- survfit(
+  surv_obj ~ SEX,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Scours Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+#breed
+fit <- survfit(
+  surv_obj ~ CBRD,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Scours Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+#Source Farm
+fit <- survfit(
+  surv_obj ~ SRCE,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Scours Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "none",
+  break.time.by = 7)
+```
+
+#### 30d PNEU
+
+```{r}
+
+surv_obj <- Surv(
+  time  = full$PNEU30,
+  event = full$P30)
+
+#by compartment
+fit <- survfit(
+  surv_obj ~ comp,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Resp Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+table(full$P30)
+
+
+#by stocking density quartile
+
+fit <- survfit(
+  surv_obj ~ quart_custom,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Resp Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+
+#month
+
+fit <- survfit(
+  surv_obj ~ month,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Resp Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+
+
+#by distinct load
+fit <- survfit(
+  surv_obj ~ LOADfull,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Resp Treatment Survival Probability",
+  xlim = c(0, 28),
+  legend = "none",
+  break.time.by = 7)
+
+#HUGE Variation!!!!
+
+
+
+#sex
+fit <- survfit(
+  surv_obj ~ SEX,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Resp Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+#breed
+fit <- survfit(
+  surv_obj ~ CBRD,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Resp Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+
+
+#sourcefarm
+fit <- survfit(
+  surv_obj ~ SRCE,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Resp Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "none",
+  break.time.by = 7)
+
+```
+
+#### 60d PNEU
+
+```{r}
+surv_obj <- Surv(
+  time  = full$PNEU60,
+  event = full$P60)
+
+#by compartment
+fit <- survfit(
+  surv_obj ~ comp,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Resp Treatment Survival Probability",
+  xlim = c(0, 60),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+table(full$P30)
+
+
+#by stocking density quartile
+
+fit <- survfit(
+  surv_obj ~ quart_custom,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Resp Treatment Survival Probability",
+  xlim = c(0, 60),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+
+#month
+
+fit <- survfit(
+  surv_obj ~ month,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Resp Treatment Survival Probability",
+  xlim = c(0, 60),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+
+
+#by distinct load
+fit <- survfit(
+  surv_obj ~ LOADfull,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Resp Treatment Survival Probability",
+  xlim = c(0, 60),
+  legend = "none",
+  break.time.by = 7)
+
+#HUGE Variation!!!!
+
+
+
+#sex
+fit <- survfit(
+  surv_obj ~ SEX,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Resp Treatment Survival Probability",
+  xlim = c(0, 60),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+#breed
+fit <- survfit(
+  surv_obj ~ CBRD,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Resp Treatment Survival Probability",
+  xlim = c(0, 60),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+#sourcefarm
+fit <- survfit(
+  surv_obj ~ SRCE,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Resp Treatment Survival Probability",
+  xlim = c(0, 60),
+  ylim = c(0, 1.0),
+  legend = "none",
+  break.time.by = 7)
+```
+
+#### 30d BLOAT
+
+```{r}
+
+surv_obj <- Surv(
+  time  = full$BLOAT30,
+  event = full$B30)
+
+#by compartment
+fit <- survfit(
+  surv_obj ~ comp,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Bloat Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+table(full$B30)
+
+
+#by stocking density quartile
+
+fit <- survfit(
+  surv_obj ~ quart_custom,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Bloat Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+
+#month
+
+fit <- survfit(
+  surv_obj ~ month,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Bloat Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+
+
+#by distinct load
+fit <- survfit(
+  surv_obj ~ LOADfull,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Bloat Treatment Survival Probability",
+  xlim = c(0.5, 28),
+  legend = "none",
+  break.time.by = 7)
+
+#HUGE Variation!!!!
+
+
+
+#sex
+fit <- survfit(
+  surv_obj ~ SEX,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Bloat Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+#breed
+fit <- survfit(
+  surv_obj ~ CBRD,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Bloat Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+#sourcefarm
+fit <- survfit(
+  surv_obj ~ SRCE,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Resp Treatment Survival Probability",
+  xlim = c(0, 30),
+  ylim = c(0.75, 1.0),
+  legend = "none",
+  break.time.by = 7)
+
+
+
+```
+
+#### 30d NAVEL
+
+```{r}
+surv_obj <- Surv(
+  time  = full$NAVAL30,
+  event = full$NAV30)
+
+#by compartment
+fit <- survfit(
+  surv_obj ~ comp,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Naval Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.8, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+table(full$NAV30)
+
+
+#by stocking density quartile
+
+fit <- survfit(
+  surv_obj ~ quart_custom,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Naval  Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.8, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+
+#month
+
+fit <- survfit(
+  surv_obj ~ month,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Naval Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+
+
+#by distinct load
+fit <- survfit(
+  surv_obj ~ LOADfull,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Naval Treatment Survival Probability",
+  xlim = c(0.5, 28),
+  legend = "none",
+  break.time.by = 7)
+
+#HUGE Variation!!!!
+
+
+
+#sex
+fit <- survfit(
+  surv_obj ~ SEX,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Naval Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+#breed
+fit <- survfit(
+  surv_obj ~ CBRD,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Naval Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+#sourcefarm
+fit <- survfit(
+  surv_obj ~ SRCE,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Naval Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "none",
+  break.time.by = 7)
+
+
+
+```
+
+#### 30d IM
+
+```{r}
+surv_obj <- Surv(
+  time  = full$ILLMISC30,
+  event = full$IM30)
+
+#by compartment
+fit <- survfit(
+  surv_obj ~ comp,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "IM Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.8, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+table(full$IM30)
+
+
+#by stocking density quartile
+
+fit <- survfit(
+  surv_obj ~ quart_custom,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "IM Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.8, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+
+#month
+
+fit <- survfit(
+  surv_obj ~ month,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "IM Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+
+
+#by distinct load
+fit <- survfit(
+  surv_obj ~ LOADfull,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "IM Treatment Survival Probability",
+  xlim = c(0.5, 28),
+  legend = "none",
+  break.time.by = 7)
+
+#HUGE Variation!!!!
+
+
+
+#sex
+fit <- survfit(
+  surv_obj ~ SEX,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "IM Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+#breed
+fit <- survfit(
+  surv_obj ~ CBRD,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "IM Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+#sourcefarm
+fit <- survfit(
+  surv_obj ~ SRCE,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "IM Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "none",
+  break.time.by = 7)
+
+
+```
+
+#### 10d INJURY
+
+```{r}
+
+surv_obj <- Surv(
+  time  = full$INJURY10,
+  event = full$I10)
+
+#by compartment
+fit <- survfit(
+  surv_obj ~ comp,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.8),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Injury Treatment Survival Probability",
+  xlim = c(0, 10),
+  ylim = c(0.8, 1.0),
+  legend = "top",
+  break.time.by = 2)
+
+table(full$I10)
+
+
+#by stocking density quartile
+
+fit <- survfit(
+  surv_obj ~ quart_custom,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.8),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Injury Treatment Survival Probability",
+  xlim = c(0, 10),
+  ylim = c(0.8, 1.0),
+  legend = "top",
+  break.time.by = 2)
+
+
+
+#month
+
+fit <- survfit(
+  surv_obj ~ month,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Injury Treatment Survival Probability",
+  xlim = c(0, 10),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 2)
+
+
+
+
+#by distinct load
+fit <- survfit(
+  surv_obj ~ LOADfull,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Injury Treatment Survival Probability",
+  xlim = c(0.5, 10),
+  legend = "none",
+  break.time.by = 2)
+
+#HUGE Variation!!!!
+
+
+
+#sex
+fit <- survfit(
+  surv_obj ~ SEX,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Injury Treatment Survival Probability",
+  xlim = c(0, 10),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 2)
+
+
+#breed
+fit <- survfit(
+  surv_obj ~ CBRD,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Injury Treatment Survival Probability",
+  xlim = c(0, 10),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 2)
+
+
+#sourcefarm
+fit <- survfit(
+  surv_obj ~ SRCE,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Injury Treatment Survival Probability",
+  xlim = c(0, 10),
+  ylim = c(0.5, 1.0),
+  legend = "none",
+  break.time.by = 2)
+
+```
+
+#### 10d LAME
+
+```{r}
+surv_obj <- Surv(
+  time  = full$LAME10,
+  event = full$L10)
+
+#by compartment
+fit <- survfit(
+  surv_obj ~ comp,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.8),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Lame Treatment Survival Probability",
+  xlim = c(0, 10),
+  ylim = c(0.8, 1.0),
+  legend = "top",
+  break.time.by = 2)
+
+table(full$I10)
+
+
+#by stocking density quartile
+
+fit <- survfit(
+  surv_obj ~ quart_custom,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.8),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Lame Treatment Survival Probability",
+  xlim = c(0, 10),
+  ylim = c(0.8, 1.0),
+  legend = "top",
+  break.time.by = 2)
+
+
+
+#month
+
+fit <- survfit(
+  surv_obj ~ month,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Lame Treatment Survival Probability",
+  xlim = c(0, 10),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 2)
+
+
+
+
+#by distinct load
+fit <- survfit(
+  surv_obj ~ LOADfull,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Lame Treatment Survival Probability",
+  xlim = c(0.5, 10),
+  legend = "none",
+  break.time.by = 2)
+
+#HUGE Variation!!!!
+
+
+
+#sex
+fit <- survfit(
+  surv_obj ~ SEX,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Lame Treatment Survival Probability",
+  xlim = c(0, 10),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 2)
+
+
+#breed
+fit <- survfit(
+  surv_obj ~ CBRD,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Lame Treatment Survival Probability",
+  xlim = c(0, 10),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 2)
+
+#sourcefarm
+fit <- survfit(
+  surv_obj ~ SRCE,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.9),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Lame Treatment Survival Probability",
+  xlim = c(0, 10),
+  ylim = c(0.8, 1.0),
+  legend = "none",
+  break.time.by = 1)
+```
+
+#### 30d SEPSIS
+
+```{r}
+surv_obj <- Surv(
+  time  = full$SEPSIS30,
+  event = full$S30)
+
+#by compartment
+fit <- survfit(
+  surv_obj ~ comp,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.8),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Sepsis Treatment Survival Probability",
+  xlim = c(0, 30),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+table(full$S10)
+
+
+#by stocking density quartile
+
+fit <- survfit(
+  surv_obj ~ quart_custom,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.8),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Sepsis Treatment Survival Probability",
+  xlim = c(0, 30),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+
+#month
+
+fit <- survfit(
+  surv_obj ~ month,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Sepsis Treatment Survival Probability",
+  xlim = c(0, 30),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+
+
+#by distinct load
+fit <- survfit(
+  surv_obj ~ LOADfull,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Sepsis Treatment Survival Probability",
+  xlim = c(0.5, 30),
+  legend = "none",
+  break.time.by = 7)
+
+#HUGE Variation!!!!
+
+
+
+#sex
+fit <- survfit(
+  surv_obj ~ SEX,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Sepsis Treatment Survival Probability",
+  xlim = c(0, 30),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+#breed
+fit <- survfit(
+  surv_obj ~ CBRD,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Sepsis Treatment Survival Probability",
+  xlim = c(0, 30),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+#sourcefarm
+fit <- survfit(
+  surv_obj ~ SRCE,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Sepsis Treatment Survival Probability",
+  xlim = c(0, 30),
+  ylim = c(0.5, 1.0),
+  legend = "none",
+  break.time.by = 1)
+```
+
+#### 30d DEATH
+
+```{r}
+surv_obj <- Surv(
+  time  = full$DIED30,
+  event = full$DED30)
+
+#by compartment
+fit <- survfit(
+  surv_obj ~ comp,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+table(full$DED30)
+
+
+#by stocking density quartile
+
+fit <- survfit(
+  surv_obj ~ quart_custom,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+
+#month
+
+fit <- survfit(
+  surv_obj ~ month,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+
+
+#by distinct load
+fit <- survfit(
+  surv_obj ~ LOADfull,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Survival Probability",
+  xlim = c(0, 28),
+  legend = "none",
+  break.time.by = 7)
+
+#HUGE Variation!!!!
+
+
+
+#sex
+fit <- survfit(
+  surv_obj ~ SEX,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+#breed
+fit <- survfit(
+  surv_obj ~ CBRD,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+#Source Farm
+fit <- survfit(
+  surv_obj ~ SRCE,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "none",
+  break.time.by = 7)
+```
+
+#### 60d DEATH
+
+```{r}
+surv_obj <- Surv(
+  time  = full$DIED60,
+  event = full$DED60)
+
+#by compartment
+fit <- survfit(
+  surv_obj ~ comp,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.8),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Survival Probability",
+  xlim = c(0, 60),
+  ylim = c(0.8, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+table(full$DED30)
+
+
+#by stocking density quartile
+
+fit <- survfit(
+  surv_obj ~ quart_custom,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.8),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Survival Probability",
+  xlim = c(0, 60),
+  ylim = c(0.8, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+
+#month
+
+fit <- survfit(
+  surv_obj ~ month,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.8),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Survival Probability",
+  xlim = c(0, 60),
+  ylim = c(0.8, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+
+
+#by distinct load
+fit <- survfit(
+  surv_obj ~ LOADfull,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Survival Probability",
+  xlim = c(0, 60),
+  legend = "none",
+  break.time.by = 7)
+
+#HUGE Variation!!!!
+
+
+
+#sex
+fit <- survfit(
+  surv_obj ~ SEX,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.8),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Survival Probability",
+  xlim = c(0, 60),
+  ylim = c(0.8, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+#breed
+fit <- survfit(
+  surv_obj ~ CBRD,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.8),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Survival Probability",
+  xlim = c(0, 60),
+  ylim = c(0.8, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+#sourcefarm
+fit <- survfit(
+  surv_obj ~ SRCE,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.8),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Survival Probability",
+  xlim = c(0, 60),
+  ylim = c(0.8, 1.0),
+  legend = "none",
+  break.time.by = 7)
+```
+
+### Cox Proportional Hz Models
+
+#### 30d SCOURS
+
+```{r}
+
+
+full$comp <- relevel(as.factor(full$comp), ref = "2")
+
+dia30_model <- coxme(Surv(DIAR30, D30) ~ quart_custom + (1|SRCE) + (1|month/LOADfull), 
+                   data = full)
+
+summary(dia30_model)
+Anova(dia30_model, type = "III")
+
+test_ph <- cox.zph(dia30_model)
+print(test_ph)
+
+
+plot(test_ph)
+# Plot it (Flat line = assumption holds)
+
+interaction_means <- emmeans(dia30_model, ~comp)
+sd_contrasts <- pairs(interaction_means, reverse = FALSE) 
+summary(sd_contrasts, type = "response", infer = c(TRUE, TRUE))
+
+
 ```

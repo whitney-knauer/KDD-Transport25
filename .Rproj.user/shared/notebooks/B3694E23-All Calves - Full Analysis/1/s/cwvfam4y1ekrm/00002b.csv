@@ -1,0 +1,6 @@
+"0",""
+"0","FINAL_Analysis %>% "
+"0","  group_by(SD, PN1a) %>% "
+"0","  summarize("
+"0","    dfa_mean = mean(PNEU60),"
+"0","    dfa_sd   = sd(PNEU60))"

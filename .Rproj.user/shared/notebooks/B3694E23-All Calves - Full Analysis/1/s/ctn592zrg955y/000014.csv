@@ -1,0 +1,9 @@
+"0",""
+"0",""
+"0","#By Load: "
+"0",""
+"0","surv_obj <- Surv("
+"0","  time  = FINAL_Analysis$PNEU60,"
+"0","  event = FINAL_Analysis$P60)"
+"2","Error: object 'FINAL_Analysis' not found
+"

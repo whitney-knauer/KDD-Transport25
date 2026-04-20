@@ -1,0 +1,7 @@
+"0","#| warning: false"
+"0",""
+"0","#38005 total calves in the data set"
+"0",""
+"0","full %>% "
+"0","  group_by(SEX) %>% "
+"0","  count()"

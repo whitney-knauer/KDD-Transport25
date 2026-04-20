@@ -1,0 +1,6 @@
+"0",""
+"0","FINAL_Analysis %>% "
+"0","  group_by(SD, D60yn) %>% "
+"0","  summarize("
+"0","    dfa_mean = mean(DED60),"
+"0","    dfa_sd   = sd(DED60))"
