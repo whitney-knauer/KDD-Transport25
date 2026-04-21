@@ -85,6 +85,14 @@ full %>%
   count()
 
 full %>% 
+  group_by(season) %>% 
+  count()
+
+full %>% 
+  group_by(comp_d) %>% 
+  count()
+
+full %>% 
   group_by(month) %>% 
   count()
 
@@ -207,6 +215,35 @@ summary(lm_4)
 
 
 
+full %>% 
+  group_by(as.factor(comp_d)) %>% 
+  summarize(
+    stp = mean(TPROT, na.rm=TRUE), 
+    diaM1 = mean(diaM1_clean, na.rm=TRUE), 
+    wt1 = mean(wt1_clean, na.rm=TRUE), 
+    diaload = mean(diaload, na.rm=TRUE))
+
+table(full$comp_d, full$SEX)
+table(full$comp_d, full$CBRD)
+table(full$comp_d, full$month)
+
+lm_1 <- lm(TPROT ~ as.factor(comp_d), data=full)
+summary(lm_1)
+
+lm_2 <- lm(diaM1_clean ~ as.factor(comp_d), data=full)
+summary(lm_2)
+
+lm_3 <- lm(wt1_clean ~ as.factor(comp_d), data=full)
+summary(lm_3)
+
+lm_4 <- lm(diaload ~ as.factor(comp_d), data=full)
+summary(lm_4)
+
+
+
+
+
+
 
 
 full %>% 
@@ -258,6 +295,32 @@ lm_3 <- lm(wt1_clean ~ as.factor(SRCE), data=full)
 summary(lm_3)
 
 lm_4 <- lm(diaload ~ as.factor(SRCE), data=full)
+summary(lm_4)
+
+
+
+full %>% 
+  group_by(season) %>% 
+  summarize(
+    stp = mean(TPROT, na.rm=TRUE), 
+    diaM1 = mean(diaM1_clean, na.rm=TRUE), 
+    wt1 = mean(wt1_clean, na.rm=TRUE), 
+    diaload = mean(diaload, na.rm=TRUE))
+
+table(full$season, full$SEX)
+table(full$season, full$CBRD)
+table(full$season, full$month)
+
+lm_1 <- lm(TPROT ~ as.factor(season), data=full)
+summary(lm_1)
+
+lm_2 <- lm(diaM1_clean ~ as.factor(season), data=full)
+summary(lm_2)
+
+lm_3 <- lm(wt1_clean ~ as.factor(season), data=full)
+summary(lm_3)
+
+lm_4 <- lm(diaload ~ as.factor(season), data=full)
 summary(lm_4)
 ```
 
@@ -386,6 +449,30 @@ summary_table1 <- full %>%
     prop_Dead60 = mean(DED60 == 1, na.rm = TRUE))
 
 
+
+
+summary_table1.5 <- full %>% 
+  group_by(comp_d) %>% 
+  summarize(
+    total_n = n(),
+    prop_D30 = mean(D30 == 1, na.rm = TRUE), 
+    prop_P30 = mean(P30 == 1, na.rm = TRUE), 
+    prop_P60 = mean(P60 == 1, na.rm = TRUE), 
+    prop_B30 = mean(B30 == 1, na.rm = TRUE), 
+    prop_NAV = mean(NAV30 == 1, na.rm = TRUE), 
+    prop_IM30 = mean(IM30 == 1, na.rm = TRUE), 
+    prop_I10 = mean(I10 == 1, na.rm = TRUE), 
+    prop_L10 = mean(L10 == 1, na.rm = TRUE), 
+    prop_S30 = mean(S30 == 1, na.rm = TRUE), 
+    prop_Dead30 = mean(DED30 == 1, na.rm = TRUE), 
+    prop_Dead60 = mean(DED60 == 1, na.rm = TRUE))
+
+
+
+
+
+
+
 summary_table2 <- full %>% 
   group_by(quart_custom) %>% 
   summarize(
@@ -437,6 +524,23 @@ summary_table4 <- full %>%
     prop_Dead30 = mean(DED30 == 1, na.rm = TRUE), 
     prop_Dead60 = mean(DED60 == 1, na.rm = TRUE))
 
+
+summary_table5 <- full %>% 
+  group_by(season) %>% 
+  summarize(
+    total_n = n(),
+    prop_D30 = mean(D30 == 1, na.rm = TRUE), 
+    prop_P30 = mean(P30 == 1, na.rm = TRUE), 
+    prop_P60 = mean(P60 == 1, na.rm = TRUE), 
+    prop_B30 = mean(B30 == 1, na.rm = TRUE), 
+    prop_NAV = mean(NAV30 == 1, na.rm = TRUE), 
+    prop_IM30 = mean(IM30 == 1, na.rm = TRUE), 
+    prop_I10 = mean(I10 == 1, na.rm = TRUE), 
+    prop_L10 = mean(L10 == 1, na.rm = TRUE), 
+    prop_S30 = mean(S30 == 1, na.rm = TRUE), 
+    prop_Dead30 = mean(DED30 == 1, na.rm = TRUE), 
+    prop_Dead60 = mean(DED60 == 1, na.rm = TRUE))
+
 ```
 
 #### Continuous Outcome
@@ -465,6 +569,18 @@ lm_2 <- lm(adg ~ comp, data=full)
 summary(lm_2)
 
 #yes significant but nothing I'm particularly worried about
+
+
+full %>% 
+  group_by(comp_d) %>% 
+  summarize(
+    adg = mean (adg, na.rm=TRUE))
+
+lm_2 <- lm(adg ~ comp_d, data=full)
+summary(lm_2)
+
+#yes, but unclear how much this matters
+
 
 full %>% 
   group_by(quart_custom) %>% 
@@ -502,17 +618,19 @@ summary(lm_5)
 
 1.  Compartment
 
-2.  SD
+2.  Compartment - upper vs. lower
 
-3.  Month
+3.  SD
 
-4.  Load
+4.  Month
 
-5.  Sex
+5.  Load
 
-6.  Breed
+6.  Sex
 
-7.  Source Farm
+7.  Breed
+
+8.  Source Farm
 
 #### 30d SCOURS
 
@@ -543,6 +661,26 @@ ggsurvplot(
 
 table(full$D30)
 
+#by compartment_d
+fit <- survfit(
+  surv_obj ~ comp_d,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Scours Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
 
 #by stocking density quartile
 
@@ -570,6 +708,27 @@ ggsurvplot(
 
 fit <- survfit(
   surv_obj ~ month,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Scours Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+#season
+
+fit <- survfit(
+  surv_obj ~ season,
   data = full)
 
 ggsurvplot(
@@ -699,6 +858,25 @@ ggsurvplot(
 
 table(full$P30)
 
+#by compartment_d
+fit <- survfit(
+  surv_obj ~ comp_d,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Resp Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
 
 #by stocking density quartile
 
@@ -726,6 +904,27 @@ ggsurvplot(
 
 fit <- survfit(
   surv_obj ~ month,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Resp Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+#season
+
+fit <- survfit(
+  surv_obj ~ season,
   data = full)
 
 ggsurvplot(
@@ -858,6 +1057,27 @@ ggsurvplot(
 
 table(full$P30)
 
+#by compartment_d upper vs. lower
+fit <- survfit(
+  surv_obj ~ comp_d,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Resp Treatment Survival Probability",
+  xlim = c(0, 60),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+
 
 #by stocking density quartile
 
@@ -901,6 +1121,26 @@ ggsurvplot(
   legend = "top",
   break.time.by = 7)
 
+
+#season
+
+fit <- survfit(
+  surv_obj ~ season,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Resp Treatment Survival Probability",
+  xlim = c(0, 60),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
 
 
 
@@ -1016,6 +1256,26 @@ ggsurvplot(
 table(full$B30)
 
 
+#by compartment_d upper vs. lower
+fit <- survfit(
+  surv_obj ~ comp_d,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Bloat Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
 #by stocking density quartile
 
 fit <- survfit(
@@ -1058,6 +1318,25 @@ ggsurvplot(
   legend = "top",
   break.time.by = 7)
 
+
+#season
+fit <- survfit(
+  surv_obj ~ season,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Bloat Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
 
 
 
@@ -1175,6 +1454,28 @@ ggsurvplot(
 table(full$NAV30)
 
 
+#by compartment_d with upper vs. lower
+fit <- survfit(
+  surv_obj ~ comp_d,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Naval Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.8, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
+
+
+
 #by stocking density quartile
 
 fit <- survfit(
@@ -1217,7 +1518,24 @@ ggsurvplot(
   legend = "top",
   break.time.by = 7)
 
+#season
+fit <- survfit(
+  surv_obj ~ season,
+  data = full)
 
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Naval Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
 
 
 #by distinct load
@@ -1334,6 +1652,25 @@ ggsurvplot(
 table(full$IM30)
 
 
+#by compartment_d
+fit <- survfit(
+  surv_obj ~ comp_d,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "IM Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.8, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
 #by stocking density quartile
 
 fit <- survfit(
@@ -1357,7 +1694,6 @@ ggsurvplot(
 
 
 #month
-
 fit <- survfit(
   surv_obj ~ month,
   data = full)
@@ -1376,7 +1712,24 @@ ggsurvplot(
   legend = "top",
   break.time.by = 7)
 
+#season
+fit <- survfit(
+  surv_obj ~ season,
+  data = full)
 
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "IM Treatment Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
 
 
 #by distinct load
@@ -1493,6 +1846,25 @@ ggsurvplot(
 table(full$I10)
 
 
+#by compartment_d upper vs. lower
+fit <- survfit(
+  surv_obj ~ comp_d,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.8),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Injury Treatment Survival Probability",
+  xlim = c(0, 10),
+  ylim = c(0.8, 1.0),
+  legend = "top",
+  break.time.by = 2)
+
 #by stocking density quartile
 
 fit <- survfit(
@@ -1535,7 +1907,24 @@ ggsurvplot(
   legend = "top",
   break.time.by = 2)
 
+#season
+fit <- survfit(
+  surv_obj ~ season,
+  data = full)
 
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Injury Treatment Survival Probability",
+  xlim = c(0, 10),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 2)
 
 
 #by distinct load
@@ -1649,6 +2038,25 @@ ggsurvplot(
 
 table(full$I10)
 
+#by compartment_d upper vs. lower
+fit <- survfit(
+  surv_obj ~ comp_d,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.8),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Lame Treatment Survival Probability",
+  xlim = c(0, 10),
+  ylim = c(0.8, 1.0),
+  legend = "top",
+  break.time.by = 2)
+
 
 #by stocking density quartile
 
@@ -1673,7 +2081,6 @@ ggsurvplot(
 
 
 #month
-
 fit <- survfit(
   surv_obj ~ month,
   data = full)
@@ -1692,7 +2099,24 @@ ggsurvplot(
   legend = "top",
   break.time.by = 2)
 
+#season
+fit <- survfit(
+  surv_obj ~ season,
+  data = full)
 
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Lame Treatment Survival Probability",
+  xlim = c(0, 10),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 2)
 
 
 #by distinct load
@@ -1804,6 +2228,24 @@ ggsurvplot(
 
 table(full$S10)
 
+#by compartment_d upper vs. lower
+fit <- survfit(
+  surv_obj ~ comp_d,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.8),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Sepsis Treatment Survival Probability",
+  xlim = c(0, 30),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
 
 #by stocking density quartile
 
@@ -1828,7 +2270,6 @@ ggsurvplot(
 
 
 #month
-
 fit <- survfit(
   surv_obj ~ month,
   data = full)
@@ -1847,7 +2288,24 @@ ggsurvplot(
   legend = "top",
   break.time.by = 7)
 
+#season
+fit <- survfit(
+  surv_obj ~ season,
+  data = full)
 
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Sepsis Treatment Survival Probability",
+  xlim = c(0, 30),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
 
 
 #by distinct load
@@ -1959,6 +2417,25 @@ ggsurvplot(
 
 table(full$DED30)
 
+#by compartment_d
+fit <- survfit(
+  surv_obj ~ comp_d,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.6),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
 
 #by stocking density quartile
 
@@ -2002,7 +2479,24 @@ ggsurvplot(
   legend = "top",
   break.time.by = 7)
 
+#season
+fit <- survfit(
+  surv_obj ~ season,
+  data = full)
 
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.95),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Survival Probability",
+  xlim = c(0, 28),
+  ylim = c(0.9, 1.0),
+  legend = "top",
+  break.time.by = 7)
 
 
 #by distinct load
@@ -2115,6 +2609,25 @@ ggsurvplot(
 table(full$DED30)
 
 
+#by compartment_d
+fit <- survfit(
+  surv_obj ~ comp_d,
+  data = full)
+
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.8),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Survival Probability",
+  xlim = c(0, 60),
+  ylim = c(0.8, 1.0),
+  legend = "top",
+  break.time.by = 7)
+
 #by stocking density quartile
 
 fit <- survfit(
@@ -2138,7 +2651,6 @@ ggsurvplot(
 
 
 #month
-
 fit <- survfit(
   surv_obj ~ month,
   data = full)
@@ -2157,7 +2669,24 @@ ggsurvplot(
   legend = "top",
   break.time.by = 7)
 
+#season
+fit <- survfit(
+  surv_obj ~ season,
+  data = full)
 
+ggsurvplot(
+  fit,
+  data = full,
+  pval = TRUE,
+  pval.coord = c(5, 0.8),
+  conf.int = TRUE,
+  risk.table = FALSE,
+  xlab = "Time (days)",
+  ylab = "Survival Probability",
+  xlim = c(0, 60),
+  ylim = c(0.8, 1.0),
+  legend = "top",
+  break.time.by = 7)
 
 
 #by distinct load
@@ -2244,15 +2773,14 @@ ggsurvplot(
 
 ### Cox Proportional Hz Models
 
-#### 30d SCOURS
+#### 30d SCOURS-COMP
 
 ```{r}
 
 
 full$comp <- relevel(as.factor(full$comp), ref = "2")
 
-dia30_model <- coxme(Surv(DIAR30, D30) ~ quart_custom + (1|SRCE) + (1|month/LOADfull), 
-                   data = full)
+dia30_model <- coxme(Surv(DIAR30, D30) ~ comp + SEX + (1|LOADfull) + (1|month) + (1|SRCE),  data = full)
 
 summary(dia30_model)
 Anova(dia30_model, type = "III")
@@ -2264,9 +2792,296 @@ print(test_ph)
 plot(test_ph)
 # Plot it (Flat line = assumption holds)
 
-interaction_means <- emmeans(dia30_model, ~comp)
+interaction_means <- emmeans(dia30_model, ~ comp)
 sd_contrasts <- pairs(interaction_means, reverse = FALSE) 
 summary(sd_contrasts, type = "response", infer = c(TRUE, TRUE))
 
+
+```
+
+#### 30d SCOURS-SD
+
+```{r}
+full$quart_custom <- relevel(as.factor(full$quart_custom), ref = "High")
+
+dia30_model <- coxme(Surv(DIAR30, D30) ~ quart_custom + SEX + (1|LOADfull) + (1|month) + (1|SRCE),  data = full)
+
+summary(dia30_model)
+Anova(dia30_model, type = "III")
+
+test_ph <- cox.zph(dia30_model)
+print(test_ph)
+
+
+plot(test_ph)
+# Plot it (Flat line = assumption holds)
+
+interaction_means <- emmeans(dia30_model, ~ quart_custom)
+sd_contrasts <- pairs(interaction_means, reverse = FALSE) 
+summary(sd_contrasts, type = "response", infer = c(TRUE, TRUE))
+
+```
+
+#### 30d PNEU - COMP
+
+```{r}
+
+full$comp <- relevel(as.factor(full$comp), ref = "2")
+
+pneu30_model <- coxme(Surv(PNEU30, P30) ~ comp + SEX + (1|LOADfull) + (1|month) + (1|SRCE),  data = full)
+
+summary(pneu30_model)
+Anova(pneu30_model, type = "III")
+
+test_ph <- cox.zph(pneu30_model)
+print(test_ph)
+
+
+plot(test_ph)
+# Plot it (Flat line = assumption holds)
+
+interaction_means <- emmeans(pneu30_model, ~ comp)
+sd_contrasts <- pairs(interaction_means, reverse = FALSE) 
+summary(sd_contrasts, type = "response", infer = c(TRUE, TRUE))
+
+
+```
+
+#### 30d PNEU - SD
+
+```{r}
+full$quart_custom <- relevel(as.factor(full$quart_custom), ref = "High")
+
+pneu30_model <- coxme(Surv(PNEU30, P30) ~ quart_custom + SEX + (1|LOADfull) + (1|month) + (1|SRCE),  data = full)
+
+summary(pneu30_model)
+Anova(pneu30_model, type = "III")
+
+test_ph <- cox.zph(pneu30_model)
+print(test_ph)
+
+
+plot(test_ph)
+# Plot it (Flat line = assumption holds)
+
+interaction_means <- emmeans(pneu30_model, ~ quart_custom)
+sd_contrasts <- pairs(interaction_means, reverse = FALSE) 
+summary(sd_contrasts, type = "response", infer = c(TRUE, TRUE))
+```
+
+#### 30d NAVAL - COMP
+
+```{r}
+full$comp <- relevel(as.factor(full$comp), ref = "2")
+
+naval30_model <- coxme(Surv(NAVAL30, NAV30) ~ comp + SEX + (1|LOADfull) + (1|month) + (1|SRCE),  data = full)
+
+summary(naval30_model)
+Anova(naval30_model, type = "III")
+
+test_ph <- cox.zph(naval30_model)
+print(test_ph)
+
+
+plot(test_ph)
+# Plot it (Flat line = assumption holds)
+
+interaction_means <- emmeans(naval30_model, ~ comp)
+sd_contrasts <- pairs(interaction_means, reverse = FALSE) 
+summary(sd_contrasts, type = "response", infer = c(TRUE, TRUE))
+```
+
+#### 30d NAVAL - SD
+
+```{r}
+full$quart_custom <- relevel(as.factor(full$quart_custom), ref = "High")
+
+naval30_model <- coxme(Surv(NAVAL30, NAV30) ~ quart_custom + SEX + (1|LOADfull) + (1|month) + (1|SRCE),  data = full)
+
+summary(naval30_model)
+Anova(naval30_model, type = "III")
+
+test_ph <- cox.zph(naval30_model)
+print(test_ph)
+
+
+plot(test_ph)
+# Plot it (Flat line = assumption holds)
+
+interaction_means <- emmeans(naval30_model, ~ quart_custom)
+sd_contrasts <- pairs(interaction_means, reverse = FALSE) 
+summary(sd_contrasts, type = "response", infer = c(TRUE, TRUE))
+```
+
+#### 10d LAME - COMP
+
+```{r}
+
+full$comp <- relevel(as.factor(full$comp), ref = "2")
+
+lame10_model <- coxme(Surv(INJURY10, I10) ~ comp + SEX + (1|LOADfull) + (1|month) + (1|SRCE),  data = full)
+
+summary(lame10_model)
+Anova(lame10_model, type = "III")
+
+test_ph <- cox.zph(lame10_model)
+print(test_ph)
+
+
+plot(test_ph)
+# Plot it (Flat line = assumption holds)
+
+interaction_means <- emmeans(lame10_model, ~ comp)
+sd_contrasts <- pairs(interaction_means, reverse = FALSE) 
+summary(sd_contrasts, type = "response", infer = c(TRUE, TRUE))
+```
+
+#### 10d LAME - SD
+
+```{r}
+
+full$quart_custom <- relevel(as.factor(full$quart_custom), ref = "High")
+
+lame10_model <- coxme(Surv(LAME10, L10) ~ quart_custom + SEX + (1|LOADfull) + (1|month) + (1|SRCE),  data = full)
+
+summary(lame10_model)
+Anova(lame10_model, type = "III")
+
+test_ph <- cox.zph(lame10_model)
+print(test_ph)
+
+
+interaction_means <- emmeans(lame10_model, ~ quart_custom)
+sd_contrasts <- pairs(interaction_means, reverse = FALSE) 
+summary(sd_contrasts, type = "response", infer = c(TRUE, TRUE))
+```
+
+#### 60d PNEU - COMP
+
+```{r}
+
+full$comp <- relevel(as.factor(full$comp), ref = "2")
+
+pneu60_model <- coxme(Surv(PNEU60, P60) ~ comp + SEX + (1|LOADfull) + (1|month) + (1|SRCE),  data = full)
+
+summary(pneu60_model)
+Anova(pneu60_model, type = "III")
+
+test_ph <- cox.zph(pneu60_model)
+print(test_ph)
+
+
+plot(test_ph)
+# Plot it (Flat line = assumption holds)
+
+interaction_means <- emmeans(pneu60_model, ~ comp)
+sd_contrasts <- pairs(interaction_means, reverse = FALSE) 
+summary(sd_contrasts, type = "response", infer = c(TRUE, TRUE))
+```
+
+#### 60d PNEU - SD
+
+```{r}
+
+full$quart_custom <- relevel(as.factor(full$quart_custom), ref = "High")
+
+pneu60_model <- coxme(Surv(PNEU60, P60) ~ quart_custom + SEX + (1|LOADfull) + (1|month) + (1|SRCE),  data = full)
+
+summary(pneu60_model)
+Anova(pneu60_model, type = "III")
+
+test_ph <- cox.zph(pneu60_model)
+print(test_ph)
+
+
+interaction_means <- emmeans(pneu60_model, ~ quart_custom)
+sd_contrasts <- pairs(interaction_means, reverse = FALSE) 
+summary(sd_contrasts, type = "response", infer = c(TRUE, TRUE))
+```
+
+#### 30d DEAD - COMP
+
+```{r}
+full$comp <- relevel(as.factor(full$comp), ref = "2")
+
+dead30_model <- coxme(Surv(DIED60, DED30) ~ comp + SEX + (1|LOADfull) + (1|month) + (1|SRCE),  data = full)
+
+summary(dead30_model)
+Anova(dead30_model, type = "III")
+
+test_ph <- cox.zph(dead30_model)
+print(test_ph)
+
+
+plot(test_ph)
+# Plot it (Flat line = assumption holds)
+
+interaction_means <- emmeans(dead30_model, ~ comp)
+sd_contrasts <- pairs(interaction_means, reverse = FALSE) 
+summary(sd_contrasts, type = "response", infer = c(TRUE, TRUE))
+```
+
+#### 30d DEAD - SD
+
+```{r}
+
+full$quart_custom <- relevel(as.factor(full$quart_custom), ref = "High")
+
+dead30_model <- coxme(Surv(DIED30, DED30) ~ quart_custom + SEX + (1|LOADfull) + (1|month) + (1|SRCE),  data = full)
+
+summary(dead30_model)
+Anova(dead30_model, type = "III")
+
+test_ph <- cox.zph(dead30_model)
+print(test_ph)
+
+
+interaction_means <- emmeans(dead30_model, ~ quart_custom)
+sd_contrasts <- pairs(interaction_means, reverse = FALSE) 
+summary(sd_contrasts, type = "response", infer = c(TRUE, TRUE))
+```
+
+#### 60d DEAD - COMP
+
+```{r}
+
+
+full$comp <- relevel(as.factor(full$comp), ref = "2")
+
+dead60_model <- coxme(Surv(DIED60, DED60) ~ comp + SEX + (1|LOADfull) + (1|month) + (1|SRCE),  data = full)
+
+summary(dead60_model)
+Anova(dead60_model, type = "III")
+
+test_ph <- cox.zph(dead60_model)
+print(test_ph)
+
+
+plot(test_ph)
+# Plot it (Flat line = assumption holds)
+
+interaction_means <- emmeans(dead60_model, ~ comp)
+sd_contrasts <- pairs(interaction_means, reverse = FALSE) 
+summary(sd_contrasts, type = "response", infer = c(TRUE, TRUE))
+```
+
+#### 60d DEAD - SD
+
+```{r}
+
+full$quart_custom <- relevel(as.factor(full$quart_custom), ref = "High")
+
+dead60_model <- coxme(Surv(DIED60, DED60) ~ quart_custom + SEX + (1|LOADfull) + (1|month) + (1|SRCE),  data = full)
+
+summary(dead60_model)
+Anova(dead60_model, type = "III")
+
+test_ph <- cox.zph(dead60_model)
+print(test_ph)
+
+
+interaction_means <- emmeans(dead60_model, ~ quart_custom)
+sd_contrasts <- pairs(interaction_means, reverse = FALSE) 
+summary(sd_contrasts, type = "response", infer = c(TRUE, TRUE))
 
 ```

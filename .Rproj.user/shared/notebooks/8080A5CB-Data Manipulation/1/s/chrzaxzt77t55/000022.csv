@@ -1,0 +1,18 @@
+"0","
+EXCLUDE %>% 
+  group_by(month) %>% 
+  count()
+"
+"0",""
+"0",""
+"0","#add seasons Winter (D/J/F), Spring (M/A/M), Summer (J/J/A), Fall (S/O/N)"
+"0","EXCLUDE <- EXCLUDE %>% "
+"0","  mutate(season = case_when("
+"0","    month %in% c(""Dec"", ""Jan"", ""Feb"")           ~ ""Winter"", "
+"0","    month %in% c (""Mar"", ""Apr"", ""May"")          ~ ""Spring"", "
+"0","    month %in% c (""Jun"", ""Jul"", ""Aug"")          ~ ""Summer"", "
+"0","    month %in% c(""Sep"", ""Oct"", ""Nov"")           ~ ""Fall""))"
+"0",""
+"0","EXCLUDE %>% "
+"0","  group_by(season) %>% "
+"0","  count()"

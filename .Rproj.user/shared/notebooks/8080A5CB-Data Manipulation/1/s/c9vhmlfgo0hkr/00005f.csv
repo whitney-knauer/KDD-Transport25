@@ -1,6 +1,5 @@
 "0",""
-"0","disease <- EXCLUDE %>% "
-"0"," count(DIA1, PN1a, B1, N1, IM1, I1, L1, Sep1, DIED)"
+"0","#majority in the first 100d. "
 "0",""
 "0","EXCLUDE %>% "
-"0"," count(Remark_SCOURS1, Remark_PNEU1, Remark_BLOAT1, Remark_NAVEL1, Remark_ILLMISC1, Remark_INJURY1, Remark_LAME1, Remark_SEPTIC1, Remark_DIED1)"
+"0"," summarize(across(c(DIA1, PN1a, B1, N1, IM1, I1, L1, Sep1, DIED), sum, na.rm=TRUE ))"

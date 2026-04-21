@@ -600,6 +600,41 @@ EXCLUDE<- EXCLUDE %>%
 EXCLUDE <- EXCLUDE %>%
   mutate(SRCE = str_sub(ID, 1, 2))
 
+EXCLUDE <- EXCLUDE %>%
+  mutate(stp_qrt = case_when(
+    TPROT < 5.1 ~ "Poor",
+    TPROT >= 5.1 & TPROT <= 5.7 ~ "Fair",
+    TPROT >= 5.8 & TPROT <= 6.1 ~ "Good",
+    TPROT > 6.2 ~ "Excellent",
+    TRUE ~ "Other"))
+
+#add upper vs. lower compartments
+EXCLUDE <- EXCLUDE %>% 
+  mutate(comp_d = case_when(
+    comp %in% c("1", "2", "3", "4", "5") ~ "Upper", 
+    comp %in% c ("6", "7", "8")          ~ "Lower"))
+
+EXCLUDE %>% 
+  group_by(comp_d) %>% 
+  count()
+
+EXCLUDE %>% 
+  group_by(month) %>% 
+  count()
+
+
+#add seasons Winter (D/J/F), Spring (M/A/M), Summer (J/J/A), Fall (S/O/N)
+EXCLUDE <- EXCLUDE %>% 
+  mutate(season = case_when(
+    month %in% c("Dec", "Jan", "Feb")           ~ "Winter", 
+    month %in% c ("Mar", "Apr", "May")          ~ "Spring", 
+    month %in% c ("Jun", "Jul", "Aug")          ~ "Summer", 
+    month %in% c("Sep", "Oct", "Nov")           ~ "Fall"))
+
+EXCLUDE %>% 
+  group_by(season) %>% 
+  count()
+
 ```
 
 2.  What to do with calves who arrive dat is long (\> 7d of age at arrival)? Likely that calves who were delayed transport were not normal for some reason. **There are n=68 animals plus NAs (199 total), so It's probably OK to exclude them**. What about the compartment those calves were transported in? Reasonable to expect that those calves were not too big and didn't skew the SD too much?
@@ -908,7 +943,7 @@ Should probably add week into the final data set. Also, what about the unique id
 ```{r}
 
 FULL <- EXCLUDE %>% 
-   select(ID, BDAT, SRCE, SEX, CBRD, TPROT, diaM1_clean, wt1_clean, diaM2_clean, wt2_clean, adg, LOADfull, month, comp, SD, diaload, diaARR, quartile, quart_custom, DIAR30, D30, PNEU30, P30, PNEU60, P60, BLOAT30, B30, NAVAL30, NAV30, ILLMISC30, IM30, INJURY10, I10, LAME10, L10, SEPSIS30, S30, DIED30, DED30, DIED60, DED60)
+   select(ID, BDAT, SRCE, SEX, CBRD, TPROT, stp_qrt, diaM1_clean, wt1_clean, diaM2_clean, wt2_clean, adg, LOADfull, month, season, comp, comp_d, SD, diaload, diaARR, quartile, quart_custom, DIAR30, D30, PNEU30, P30, PNEU60, P60, BLOAT30, B30, NAVAL30, NAV30, ILLMISC30, IM30, INJURY10, I10, LAME10, L10, SEPSIS30, S30, DIED30, DED30, DIED60, DED60)
 
 write.csv(x=FULL, file = 'data/FULL.csv')
 

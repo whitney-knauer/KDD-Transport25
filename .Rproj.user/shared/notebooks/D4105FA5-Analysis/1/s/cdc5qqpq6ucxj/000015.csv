@@ -1,8 +1,0 @@
-"0",""
-"0",""
-"0","full %>% "
-"0","  group_by(P30) %>% "
-"0","  summarize("
-"0","    count = n(), "
-"0","    mean = mean(PNEU30), "
-"0","    sd = sd(PNEU30))"

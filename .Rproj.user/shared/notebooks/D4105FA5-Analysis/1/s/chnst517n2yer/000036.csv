@@ -1,6 +1,0 @@
-"0","#| warning: false"
-"0",""
-"0","full %>% "
-"0","  group_by(month) %>% "
-"0","  summarize("
-"0","    adg = mean (adg, na.rm=TRUE))"

@@ -1,6 +1,0 @@
-"0",""
-"0",""
-"0","full$comp <- relevel(as.factor(full$comp), ref = ""2"")"
-"0",""
-"0","dia30_model <- coxme(Surv(DIAR30, D30) ~ quart_custom + (1|SRCE) + (1|month/LOADfull), "
-"0","                   data = full)"
