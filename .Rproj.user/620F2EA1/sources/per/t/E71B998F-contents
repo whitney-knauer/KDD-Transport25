@@ -1,0 +1,420 @@
+---
+title: "FADD Data"
+author: "WAK"
+format: html
+editor: visual
+---
+
+```{r}
+#| include: false
+#| warning: false
+#| echo: false
+
+library(epiDisplay)
+library(knitr)
+library(pROC)
+library(tidyverse)
+library(readxl)
+library(ggplot2)
+library(gmodels)
+library(ggbeeswarm)
+library(dplyr)
+library(readr)
+library(ggpubr)
+library(psych)
+library(lme4)
+library(Matrix)
+library(lmerTest)
+library(irr)
+library(lmerTest)
+library(emmeans)
+library(doBy)       
+library(gmodels)    
+library(car)           
+library(cowplot)       
+library(gridGraphics)  
+library(multcomp)
+library(hms)
+library(gt)
+library(lubridate)
+library(nlme)
+library(extrafont)
+```
+
+#### Data Steps
+
+```{r}
+
+sheeps <- read_excel("data/TPI Data.xlsx", sheet = "Farm 1 - Sheep")
+goats <- read_excel("data/TPI Data.xlsx", sheet = "Farm 2 - Goats")
+calf1 <- read_excel("data/TPI Data.xlsx", sheet = "Farm 3 - Dairy + Beef")
+calf2 <- read_excel("data/TPI Data.xlsx", sheet = "Farm 4 - Calf Depot")
+
+
+```
+
+## Sheep
+
+```{r}
+
+
+sheeps |> 
+  ggplot(mapping=aes(STP))+
+  theme_classic()+
+  geom_histogram(binwidth=0.5, 
+                 fill="purple3", 
+                 color="black", 
+                 alpha=0.7)+
+  labs(title = "Histogram of STP - SHEEP")
+
+
+#create categories
+
+sheeps<-sheeps %>% 
+  mutate(levels = 
+           case_when (
+             STP <=5.1 ~ "LOW", 
+             STP > 5.1 ~ "ADEQUATE"))
+
+sheeps %>% 
+  group_by(levels) %>% 
+  count()
+
+
+```
+
+## Goats
+
+```{r}
+
+goats |> 
+  ggplot(mapping=aes(STP))+
+  theme_classic()+
+  geom_histogram(binwidth=0.5, 
+                 fill="pink", 
+                 color="black", 
+                 alpha=0.7)+
+  labs(title = "Histogram of STP - GOATS")
+
+
+#create categories
+
+goats<-goats %>% 
+  mutate(levels = 
+           case_when (
+             STP <=5.1 ~ "LOW", 
+             STP > 5.1 ~ "ADEQUATE"))
+
+goats %>% 
+  group_by(levels) %>% 
+  count()
+
+```
+
+## Calf - One Dairy
+
+```{r}
+
+calf1 |> 
+  ggplot(mapping=aes(STP))+
+  theme_classic()+
+  geom_histogram(binwidth=0.5, 
+                 fill="red4", 
+                 color="black", 
+                 alpha=0.7)+
+  labs(title = "Histogram of STP - Calf1")
+
+
+#create categories
+
+calf1<-calf1 %>% 
+  mutate(levels = 
+           case_when (
+             STP < 5.1               ~ "Poor",
+             STP >= 5.1 & STP <= 5.7 ~ "Fair",
+             STP >= 5.8 & STP <= 6.1 ~ "Good",
+             STP >= 6.2              ~ "Excellent"))
+
+
+calf1$levels <- factor(calf1$levels, 
+                      levels = c("Excellent", "Good", "Fair", "Poor"))
+
+
+calf1 %>% 
+  group_by(levels) %>% 
+  count()
+
+
+calf1 %>% 
+  group_by (sex, levels) %>% 
+  count()
+
+calf1 %>% 
+  group_by (Breed, levels) %>% 
+  count()
+
+```
+
+```{r}
+ # Create a small reference for your goals
+goal_data <- tibble(
+  levels = c("Excellent", "Good", "Fair", "Poor"),
+  goal = c("> 25%", "40%", "20%", "< 15%") # Replace with your actual goals
+)
+
+# Build the summary dataframe
+table_data <- calf1 %>%
+  group_by(levels) %>%
+  summarize(n = n(), .groups = "drop") %>%
+  mutate(proportion = n / sum(n)) %>%
+  left_join(goal_data, by = "levels")
+
+table_data %>%
+  gt() %>%
+  cols_align(
+    align = "center",
+    columns = everything()) %>% 
+  # Add a Header
+  tab_header(
+    title = "STP Level Distribution") %>%
+  # Format the proportion column as a clean percentage
+  fmt_percent(
+    columns = proportion,
+    decimals = 1
+  ) %>%
+  # Rename columns for the display
+  cols_label(
+    levels = "Category",
+    n = "Count",
+    proportion = "Actual %",
+    goal = "Target Goal") %>%
+  # Add some nice styling
+  opt_stylize(color = "red", style = 1) %>%
+  tab_options(
+    table.width = pct(80),
+    column_labels.font.weight = "bold")
+
+```
+
+```{r}
+ # Create a small reference for your goals
+goal_data <- tibble(
+  levels = c("Excellent", "Good", "Fair", "Poor"),
+  goal = c("> 25%", "40%", "20%", "< 15%") # Replace with your actual goals
+)
+
+# Build the summary dataframe
+table_data <- calf1 %>%
+  group_by(Breed, levels) %>%
+  summarize(n = n(), .groups = "drop_last") %>%
+  mutate(proportion = n / sum(n)) %>%
+  left_join(goal_data, by = "levels")
+
+table_data %>%
+  gt() %>%
+  cols_align(
+    align = "center",
+    columns = everything()) %>% 
+  # Add a Header
+  tab_header(
+    title = "STP Level Distribution") %>%
+  # Format the proportion column as a clean percentage
+  fmt_percent(
+    columns = proportion,
+    decimals = 1
+  ) %>%
+  # Rename columns for the display
+  cols_label(
+    levels = "Category",
+    n = "Count",
+    proportion = "Actual %",
+    goal = "Target Goal") %>%
+  # Add some nice styling
+  opt_stylize(color = "red", style = 1) %>%
+  tab_options(
+    table.width = pct(80),
+    column_labels.font.weight = "bold")
+
+```
+
+## Calf Two - DEPOT
+
+```{r}
+calf2 |> 
+  ggplot(mapping=aes(STP))+
+  theme_classic()+
+  geom_histogram(binwidth=0.5, 
+                 fill="blue4", 
+                 color="black", 
+                 alpha=0.7)+
+  labs(title = "Histogram of STP - Calf2")
+
+
+#create categories
+
+calf2<-calf2 %>% 
+  mutate(levels = 
+           case_when (
+             STP < 5.1               ~ "Poor",
+             STP >= 5.1 & STP <= 5.7 ~ "Fair",
+             STP >= 5.8 & STP <= 6.1 ~ "Good",
+             STP >= 6.2              ~ "Excellent"))
+
+
+calf2$levels <- factor(calf2$levels, 
+                      levels = c("Excellent", "Good", "Fair", "Poor"))
+
+calf2 %>% 
+  group_by(levels) %>% 
+  count()
+
+
+calf2 %>% 
+  group_by(SourceFarm) %>% 
+  count()
+
+
+calf2 %>% 
+  group_by(SourceFarm, levels) %>% 
+  count()
+
+
+
+```
+
+```{r}
+ # Create a small reference for your goals
+goal_data <- tibble(
+  levels = c("Excellent", "Good", "Fair", "Poor"),
+  goal = c("> 25%", "40%", "20%", "< 15%") # Replace with your actual goals
+)
+
+# Build the summary dataframe
+table_data <- calf2 %>%
+  group_by(levels) %>%
+  summarize(n = n(), .groups = "drop") %>%
+  mutate(proportion = n / sum(n)) %>%
+  left_join(goal_data, by = "levels")
+
+table_data %>%
+  gt() %>%
+  cols_align(
+    align = "center",
+    columns = everything()) %>% 
+  # Add a Header
+  tab_header(
+    title = "STP Level Distribution") %>%
+  # Format the proportion column as a clean percentage
+  fmt_percent(
+    columns = proportion,
+    decimals = 1
+  ) %>%
+  # Rename columns for the display
+  cols_label(
+    levels = "Category",
+    n = "Count",
+    proportion = "Actual %",
+    goal = "Target Goal") %>%
+  # Add some nice styling
+  opt_stylize(color = "red", style = 1) %>%
+  tab_options(
+    table.width = pct(80),
+    column_labels.font.weight = "bold")
+
+```
+
+```{r}
+ # Create a small reference for your goals
+goal_data <- tibble(
+  levels = c("Excellent", "Good", "Fair", "Poor"),
+  goal = c("> 25%", "40%", "20%", "< 15%") # Replace with your actual goals
+)
+
+# Build the summary dataframe
+table_data <- calf2 %>%
+  group_by(SourceFarm,levels) %>%
+  summarize(n = n(), .groups = "drop_last") %>%
+  mutate(proportion = n / sum(n)) %>%
+  left_join(goal_data, by = "levels")
+
+table_data %>%
+  gt() %>%
+  cols_align(
+    align = "center",
+    columns = everything()) %>% 
+  # Add a Header
+  tab_header(
+    title = "STP Level Distribution") %>%
+  # Format the proportion column as a clean percentage
+  fmt_percent(
+    columns = proportion,
+    decimals = 1
+  ) %>%
+  # Rename columns for the display
+  cols_label(
+    levels = "Category",
+    n = "Count",
+    proportion = "Actual %",
+    goal = "Target Goal") %>%
+  # Add some nice styling
+  opt_stylize(color = "red", style = 1) %>%
+  tab_options(
+    table.width = pct(80),
+    column_labels.font.weight = "bold")
+
+```
+
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+
+# 1. Create the dataset
+data <- data.frame(
+  Marker = c("Glucose (mmol/L)", "NEFA (µmol/L)"),
+  Milk_6h = c(4.71, 586.5),
+  Milk_18h = c(3.10, 853.2),
+  Electrolytes_6h = c(3.56, 916.0),
+  Electrolytes_18h = c(3.35, 837.7),
+  SEM = c(0.14, 54.8) 
+)
+
+# 2. Transform data to 'long' format
+data_long <- data %>%
+  pivot_longer(
+    cols = c(Milk_6h, Milk_18h, Electrolytes_6h, Electrolytes_18h), 
+    names_to = c("Feeding", "Transport_Time"), 
+    names_sep = "_",
+    values_to = "Value"
+  )
+
+# 3. Ensure 6h is on the left and 18h is on the right
+data_long$Transport_Time <- factor(data_long$Transport_Time, levels = c("6h", "18h"))
+
+# 4. Create the unstacked (side-by-side) bar graph
+ggplot(data_long, aes(x = Transport_Time, y = Value, fill = Feeding)) +
+  geom_bar(stat = "identity", position = position_dodge(0.7), width = 0.6) +
+  geom_errorbar(
+    aes(ymin = Value - SEM, ymax = Value + SEM),
+    position = position_dodge(0.7), 
+    width = 0.15
+  ) +
+  # nrow = 1 puts Glucose and NEFA side-by-side
+  facet_wrap(~ Marker, nrow = 1, scales = "free_y") + 
+  theme_classic() +
+  labs(
+    title = "Metabolic Response Comparison",
+    x = "Transport Duration",
+    y = "Mean Value ± SEM",
+    fill = "Feeding Group"
+  ) +
+  # Using a clean color palette
+  scale_fill_manual(values = c("Electrolytes" = "#56B4E9", "Milk" = "#CC79A7")) +
+  theme(
+    strip.background = element_rect(fill = "grey95", color = NA),
+    strip.text = element_text(face = "bold", size = 11),
+    axis.line = element_line(color = "black"),
+    legend.position = "bottom"
+  )
+```

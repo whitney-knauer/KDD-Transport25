@@ -204,3 +204,46 @@ ggsurvplot(
   legend = "top",
   break.time.by = 7)
 ```
+
+### STP Levels D vs. B
+
+```{r}
+ # Create a small reference for your goals
+goal_data <- tibble(
+  stp_qrt = c("Excellent", "Good", "Fair", "Poor"),
+  goal = c("> 25%", "40%", "20%", "< 15%") # Replace with your actual goals
+)
+
+# Build the summary dataframe
+table_data <- no_other %>%
+  group_by(CBRD, SEX, stp_qrt) %>%
+  summarize(n = n(), .groups = "drop_last") %>%
+  mutate(proportion = n / sum(n)) %>%
+  left_join(goal_data, by = "stp_qrt")
+
+table_data %>%
+  gt() %>%
+  cols_align(
+    align = "center",
+    columns = everything()) %>% 
+  # Add a Header
+  tab_header(
+    title = "STP Level Distribution") %>%
+  # Format the proportion column as a clean percentage
+  fmt_percent(
+    columns = proportion,
+    decimals = 1
+  ) %>%
+  # Rename columns for the display
+  cols_label(
+    stp_qrt = "Category",
+    n = "Count",
+    proportion = "Actual %",
+    goal = "Target Goal") %>%
+  # Add some nice styling
+  opt_stylize(color = "red", style = 1) %>%
+  tab_options(
+    table.width = pct(80),
+    column_labels.font.weight = "bold")
+
+```
