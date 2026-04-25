@@ -216,7 +216,7 @@ goal_data <- tibble(
 
 # Build the summary dataframe
 table_data <- no_other %>%
-  group_by(CBRD, SEX, stp_qrt) %>%
+  group_by(stp_qrt) %>%
   summarize(n = n(), .groups = "drop_last") %>%
   mutate(proportion = n / sum(n)) %>%
   left_join(goal_data, by = "stp_qrt")

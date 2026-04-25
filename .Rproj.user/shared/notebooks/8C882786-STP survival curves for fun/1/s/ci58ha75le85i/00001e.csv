@@ -6,7 +6,7 @@
 "0",""
 "0","# Build the summary dataframe"
 "0","table_data <- no_other %>%"
-"0","  group_by(CBRD, SEX, stp_qrt) %>%"
+"0","  group_by(stp_qrt) %>%"
 "0","  summarize(n = n(), .groups = ""drop_last"") %>%"
 "0","  mutate(proportion = n / sum(n)) %>%"
 "0","  left_join(goal_data, by = ""stp_qrt"")"
