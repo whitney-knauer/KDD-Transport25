@@ -1,0 +1,8 @@
+"0",""
+"0","full %>% "
+"0","  group_by(SRCE) %>% "
+"0","  summarize("
+"0","    stp = mean(TPROT, na.rm=TRUE), "
+"0","    diaM1 = mean(diaM1_clean, na.rm=TRUE), "
+"0","    wt1 = mean(wt1_clean, na.rm=TRUE), "
+"0","    diaload = mean(diaload, na.rm=TRUE))"
