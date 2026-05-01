@@ -1,0 +1,7 @@
+"0",""
+"0","sheeps <- read_excel(""data/TPI Data.xlsx"", sheet = ""Farm 1 - Sheep"")"
+"0","goats <- read_excel(""data/TPI Data.xlsx"", sheet = ""Farm 2 - Goats"")"
+"0","calf1 <- read_excel(""data/TPI Data.xlsx"", sheet = ""Farm 3 - Dairy + Beef"")"
+"0","calf2 <- read_excel(""data/TPI Data.xlsx"", sheet = ""Farm 4 - Calf Depot"")"
+"0",""
+"0",""

@@ -1,0 +1,585 @@
+<div id="heijbulaza" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+  <style>#heijbulaza table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#heijbulaza thead, #heijbulaza tbody, #heijbulaza tfoot, #heijbulaza tr, #heijbulaza td, #heijbulaza th {
+  border-style: none;
+}
+
+#heijbulaza p {
+  margin: 0;
+  padding: 0;
+}
+
+#heijbulaza .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: 80%;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A81600;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A81600;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#heijbulaza .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#heijbulaza .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#heijbulaza .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#heijbulaza .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#heijbulaza .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #E4220C;
+}
+
+#heijbulaza .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #E4220C;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #E4220C;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#heijbulaza .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: bold;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#heijbulaza .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: bold;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#heijbulaza .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#heijbulaza .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#heijbulaza .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #E4220C;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#heijbulaza .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#heijbulaza .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #E4220C;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #E4220C;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#heijbulaza .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #E4220C;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #E4220C;
+  vertical-align: middle;
+}
+
+#heijbulaza .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#heijbulaza .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#heijbulaza .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: none;
+  border-top-width: 1px;
+  border-top-color: #FFCCC7;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #FFCCC7;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #FFCCC7;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#heijbulaza .gt_stub {
+  color: #FFFFFF;
+  background-color: #E4220C;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #E4220C;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#heijbulaza .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#heijbulaza .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#heijbulaza .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#heijbulaza .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#heijbulaza .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #E4220C;
+}
+
+#heijbulaza .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#heijbulaza .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #E4220C;
+}
+
+#heijbulaza .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFCCC7;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#heijbulaza .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #E4220C;
+}
+
+#heijbulaza .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #E4220C;
+}
+
+#heijbulaza .gt_striped {
+  background-color: #F4F4F4;
+}
+
+#heijbulaza .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #E4220C;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #E4220C;
+}
+
+#heijbulaza .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#heijbulaza .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#heijbulaza .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#heijbulaza .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#heijbulaza .gt_left {
+  text-align: left;
+}
+
+#heijbulaza .gt_center {
+  text-align: center;
+}
+
+#heijbulaza .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#heijbulaza .gt_font_normal {
+  font-weight: normal;
+}
+
+#heijbulaza .gt_font_bold {
+  font-weight: bold;
+}
+
+#heijbulaza .gt_font_italic {
+  font-style: italic;
+}
+
+#heijbulaza .gt_super {
+  font-size: 65%;
+}
+
+#heijbulaza .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#heijbulaza .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#heijbulaza .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#heijbulaza .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#heijbulaza .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#heijbulaza .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#heijbulaza .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#heijbulaza .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#heijbulaza div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+  <table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+  <thead>
+    <tr class="gt_heading">
+      <td colspan="4" class="gt_heading gt_title gt_font_normal gt_bottom_border" style>STP Level Distribution</td>
+    </tr>
+    
+    <tr class="gt_col_headings">
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="levels">Category</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="n">Count</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="proportion">Actual %</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="goal">Target Goal</th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr class="gt_group_heading_row">
+      <th colspan="4" class="gt_group_heading" scope="colgroup" id="AA">AA</th>
+    </tr>
+    <tr class="gt_row_group_first"><td headers="AA  levels" class="gt_row gt_center">Excellent</td>
+<td headers="AA  n" class="gt_row gt_center">44</td>
+<td headers="AA  proportion" class="gt_row gt_center">67.7%</td>
+<td headers="AA  goal" class="gt_row gt_center">40%</td></tr>
+    <tr><td headers="AA  levels" class="gt_row gt_center gt_striped">Good</td>
+<td headers="AA  n" class="gt_row gt_center gt_striped">7</td>
+<td headers="AA  proportion" class="gt_row gt_center gt_striped">10.8%</td>
+<td headers="AA  goal" class="gt_row gt_center gt_striped">30%</td></tr>
+    <tr><td headers="AA  levels" class="gt_row gt_center">Fair</td>
+<td headers="AA  n" class="gt_row gt_center">14</td>
+<td headers="AA  proportion" class="gt_row gt_center">21.5%</td>
+<td headers="AA  goal" class="gt_row gt_center">20%</td></tr>
+    <tr class="gt_group_heading_row">
+      <th colspan="4" class="gt_group_heading" scope="colgroup" id="BB">BB</th>
+    </tr>
+    <tr class="gt_row_group_first"><td headers="BB  levels" class="gt_row gt_center gt_striped">Excellent</td>
+<td headers="BB  n" class="gt_row gt_center gt_striped">44</td>
+<td headers="BB  proportion" class="gt_row gt_center gt_striped">30.8%</td>
+<td headers="BB  goal" class="gt_row gt_center gt_striped">40%</td></tr>
+    <tr><td headers="BB  levels" class="gt_row gt_center">Good</td>
+<td headers="BB  n" class="gt_row gt_center">38</td>
+<td headers="BB  proportion" class="gt_row gt_center">26.6%</td>
+<td headers="BB  goal" class="gt_row gt_center">30%</td></tr>
+    <tr><td headers="BB  levels" class="gt_row gt_center gt_striped">Fair</td>
+<td headers="BB  n" class="gt_row gt_center gt_striped">52</td>
+<td headers="BB  proportion" class="gt_row gt_center gt_striped">36.4%</td>
+<td headers="BB  goal" class="gt_row gt_center gt_striped">20%</td></tr>
+    <tr><td headers="BB  levels" class="gt_row gt_center">Poor</td>
+<td headers="BB  n" class="gt_row gt_center">9</td>
+<td headers="BB  proportion" class="gt_row gt_center">6.3%</td>
+<td headers="BB  goal" class="gt_row gt_center">&lt; 10%</td></tr>
+    <tr class="gt_group_heading_row">
+      <th colspan="4" class="gt_group_heading" scope="colgroup" id="CC">CC</th>
+    </tr>
+    <tr class="gt_row_group_first"><td headers="CC  levels" class="gt_row gt_center gt_striped">Excellent</td>
+<td headers="CC  n" class="gt_row gt_center gt_striped">14</td>
+<td headers="CC  proportion" class="gt_row gt_center gt_striped">43.8%</td>
+<td headers="CC  goal" class="gt_row gt_center gt_striped">40%</td></tr>
+    <tr><td headers="CC  levels" class="gt_row gt_center">Good</td>
+<td headers="CC  n" class="gt_row gt_center">8</td>
+<td headers="CC  proportion" class="gt_row gt_center">25.0%</td>
+<td headers="CC  goal" class="gt_row gt_center">30%</td></tr>
+    <tr><td headers="CC  levels" class="gt_row gt_center gt_striped">Fair</td>
+<td headers="CC  n" class="gt_row gt_center gt_striped">9</td>
+<td headers="CC  proportion" class="gt_row gt_center gt_striped">28.1%</td>
+<td headers="CC  goal" class="gt_row gt_center gt_striped">20%</td></tr>
+    <tr><td headers="CC  levels" class="gt_row gt_center">Poor</td>
+<td headers="CC  n" class="gt_row gt_center">1</td>
+<td headers="CC  proportion" class="gt_row gt_center">3.1%</td>
+<td headers="CC  goal" class="gt_row gt_center">&lt; 10%</td></tr>
+    <tr class="gt_group_heading_row">
+      <th colspan="4" class="gt_group_heading" scope="colgroup" id="DD">DD</th>
+    </tr>
+    <tr class="gt_row_group_first"><td headers="DD  levels" class="gt_row gt_center gt_striped">Excellent</td>
+<td headers="DD  n" class="gt_row gt_center gt_striped">64</td>
+<td headers="DD  proportion" class="gt_row gt_center gt_striped">76.2%</td>
+<td headers="DD  goal" class="gt_row gt_center gt_striped">40%</td></tr>
+    <tr><td headers="DD  levels" class="gt_row gt_center">Good</td>
+<td headers="DD  n" class="gt_row gt_center">10</td>
+<td headers="DD  proportion" class="gt_row gt_center">11.9%</td>
+<td headers="DD  goal" class="gt_row gt_center">30%</td></tr>
+    <tr><td headers="DD  levels" class="gt_row gt_center gt_striped">Fair</td>
+<td headers="DD  n" class="gt_row gt_center gt_striped">7</td>
+<td headers="DD  proportion" class="gt_row gt_center gt_striped">8.3%</td>
+<td headers="DD  goal" class="gt_row gt_center gt_striped">20%</td></tr>
+    <tr><td headers="DD  levels" class="gt_row gt_center">Poor</td>
+<td headers="DD  n" class="gt_row gt_center">3</td>
+<td headers="DD  proportion" class="gt_row gt_center">3.6%</td>
+<td headers="DD  goal" class="gt_row gt_center">&lt; 10%</td></tr>
+    <tr class="gt_group_heading_row">
+      <th colspan="4" class="gt_group_heading" scope="colgroup" id="EE">EE</th>
+    </tr>
+    <tr class="gt_row_group_first"><td headers="EE  levels" class="gt_row gt_center gt_striped">Excellent</td>
+<td headers="EE  n" class="gt_row gt_center gt_striped">29</td>
+<td headers="EE  proportion" class="gt_row gt_center gt_striped">41.4%</td>
+<td headers="EE  goal" class="gt_row gt_center gt_striped">40%</td></tr>
+    <tr><td headers="EE  levels" class="gt_row gt_center">Good</td>
+<td headers="EE  n" class="gt_row gt_center">13</td>
+<td headers="EE  proportion" class="gt_row gt_center">18.6%</td>
+<td headers="EE  goal" class="gt_row gt_center">30%</td></tr>
+    <tr><td headers="EE  levels" class="gt_row gt_center gt_striped">Fair</td>
+<td headers="EE  n" class="gt_row gt_center gt_striped">17</td>
+<td headers="EE  proportion" class="gt_row gt_center gt_striped">24.3%</td>
+<td headers="EE  goal" class="gt_row gt_center gt_striped">20%</td></tr>
+    <tr><td headers="EE  levels" class="gt_row gt_center">Poor</td>
+<td headers="EE  n" class="gt_row gt_center">11</td>
+<td headers="EE  proportion" class="gt_row gt_center">15.7%</td>
+<td headers="EE  goal" class="gt_row gt_center">&lt; 10%</td></tr>
+    <tr class="gt_group_heading_row">
+      <th colspan="4" class="gt_group_heading" scope="colgroup" id="FF">FF</th>
+    </tr>
+    <tr class="gt_row_group_first"><td headers="FF  levels" class="gt_row gt_center gt_striped">Fair</td>
+<td headers="FF  n" class="gt_row gt_center gt_striped">1</td>
+<td headers="FF  proportion" class="gt_row gt_center gt_striped">10.0%</td>
+<td headers="FF  goal" class="gt_row gt_center gt_striped">20%</td></tr>
+    <tr><td headers="FF  levels" class="gt_row gt_center">Poor</td>
+<td headers="FF  n" class="gt_row gt_center">9</td>
+<td headers="FF  proportion" class="gt_row gt_center">90.0%</td>
+<td headers="FF  goal" class="gt_row gt_center">&lt; 10%</td></tr>
+    <tr class="gt_group_heading_row">
+      <th colspan="4" class="gt_group_heading" scope="colgroup" id="GG">GG</th>
+    </tr>
+    <tr class="gt_row_group_first"><td headers="GG  levels" class="gt_row gt_center gt_striped">Excellent</td>
+<td headers="GG  n" class="gt_row gt_center gt_striped">24</td>
+<td headers="GG  proportion" class="gt_row gt_center gt_striped">75.0%</td>
+<td headers="GG  goal" class="gt_row gt_center gt_striped">40%</td></tr>
+    <tr><td headers="GG  levels" class="gt_row gt_center">Good</td>
+<td headers="GG  n" class="gt_row gt_center">3</td>
+<td headers="GG  proportion" class="gt_row gt_center">9.4%</td>
+<td headers="GG  goal" class="gt_row gt_center">30%</td></tr>
+    <tr><td headers="GG  levels" class="gt_row gt_center gt_striped">Fair</td>
+<td headers="GG  n" class="gt_row gt_center gt_striped">5</td>
+<td headers="GG  proportion" class="gt_row gt_center gt_striped">15.6%</td>
+<td headers="GG  goal" class="gt_row gt_center gt_striped">20%</td></tr>
+  </tbody>
+  
+  
+</table>
+</div>

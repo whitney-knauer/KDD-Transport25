@@ -1,0 +1,3 @@
+"0",""
+"0","full$stp_qrt <- factor(full$stp_qrt, "
+"0","                      levels = c(""Excellent"", ""Good"", ""Fair"", ""Poor""))"

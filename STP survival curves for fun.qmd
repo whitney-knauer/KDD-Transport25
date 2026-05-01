@@ -73,7 +73,8 @@ full %>%
   filter(stp_qrt!="Other") %>% 
   count()
 
-
+full$stp_qrt <- factor(full$stp_qrt, 
+                      levels = c("Excellent", "Good", "Fair", "Poor"))
 ```
 
 ### Outcomes based on STP categories
@@ -211,12 +212,16 @@ ggsurvplot(
  # Create a small reference for your goals
 goal_data <- tibble(
   stp_qrt = c("Excellent", "Good", "Fair", "Poor"),
-  goal = c("> 25%", "40%", "20%", "< 15%") # Replace with your actual goals
+  goal = c("40%", "30%", "20%", "10%") # Replace with your actual goals
 )
+
+
+goal_data$stp_qrt <- factor(goal_data$stp_qrt, 
+                      levels = c("Excellent", "Good", "Fair", "Poor"))
 
 # Build the summary dataframe
 table_data <- no_other %>%
-  group_by(stp_qrt) %>%
+  group_by(CBRD, SEX, stp_qrt) %>%
   summarize(n = n(), .groups = "drop_last") %>%
   mutate(proportion = n / sum(n)) %>%
   left_join(goal_data, by = "stp_qrt")

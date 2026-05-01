@@ -3,7 +3,7 @@
     "path": "~/GitHub/KDD-Transport25/STP survival curves for fun.qmd",
     "project_path": "STP survival curves for fun.qmd",
     "type": "quarto_markdown",
-    "hash": "1846239517",
+    "hash": "1846990384",
     "contents": "",
     "dirty": false,
     "created": 1776706136520.0,
@@ -15,18 +15,18 @@
         "tempName": "Untitled1",
         "source_window_id": "",
         "Source": "Source",
-        "docOutlineVisible": "1",
+        "docOutlineVisible": "0",
         "rmdVisualCollapsedChunks": "",
-        "cursorPosition": "209,0",
+        "cursorPosition": "50,0",
         "scrollLine": "0",
-        "rmdVisualModeLocation": "72:0"
+        "rmdVisualModeLocation": "3421:3886.666748046875"
     },
     "folds": "",
-    "lastKnownWriteTime": 1777143818,
+    "lastKnownWriteTime": 1777642024,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1777143818233,
+    "last_content_update": 1777642025490,
     "read_only": false,
     "read_only_alternatives": []
 }
