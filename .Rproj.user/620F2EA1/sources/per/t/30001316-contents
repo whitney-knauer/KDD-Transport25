@@ -2514,6 +2514,7 @@ ggsurvplot(
   xlab = "Time (days)",
   ylab = "Survival Probability",
   xlim = c(0, 28),
+  ylim = c(0.5, 1.0),
   legend = "none",
   break.time.by = 7)
 
